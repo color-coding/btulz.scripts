@@ -5,7 +5,7 @@ echo               builds.bat
 echo                     by niuren.zhu
 echo                           2017.06.01
 echo  说明：
-echo     1. 遍历工作目录，存在compile_and_package.bat则调用。
+echo     1. 遍历工作目录，存在build_all.bat则调用。
 echo     2. 参数1，工作目录。
 echo ****************************************************************************
 REM 设置参数变量
