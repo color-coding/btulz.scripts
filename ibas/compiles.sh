@@ -24,8 +24,13 @@ then
 fi
 
 echo --工作的目录：${WORK_FOLDER}
+# 获取编译顺序
+if [ ! -e ${WORK_FOLDER}/compile_order.txt ]
+then
+  ls -l ${WORK_FOLDER} | awk '/^d/{print $NF}' > ${WORK_FOLDER}/compile_order.txt
+fi
 # 遍历当前目录存
-for folder in `ls -l "${WORK_FOLDER}" | awk '/^d/{print $NF}'`
+while read folder
 do
   if [ -x "${WORK_FOLDER}/${folder}/compile_and_package.sh" ]
   then
@@ -33,5 +38,5 @@ do
     echo ----开始编译：`pwd`
     "${WORK_FOLDER}/${folder}/compile_and_package.sh" 
   fi
-done
+done < ${WORK_FOLDER}/compile_order.txt | sed 's/\r//g'
 cd ${WORK_FOLDER}
