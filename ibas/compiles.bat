@@ -1,7 +1,7 @@
 @echo off
 setlocal EnableDelayedExpansion
 echo ***************************************************************************
-echo      compiles.bat
+echo              compiles.bat
 echo                     by niuren.zhu
 echo                           2017.05.27
 echo  ËµÃ÷£º

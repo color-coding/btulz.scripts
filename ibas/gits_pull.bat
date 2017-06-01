@@ -1,7 +1,7 @@
 @echo off
 setlocal EnableDelayedExpansion
 echo ***************************************************************************
-echo      gits_pull.bat
+echo             gits_pull.bat
 echo                     by niuren.zhu
 echo                           2017.05.27
 echo  ËµÃ÷£º
