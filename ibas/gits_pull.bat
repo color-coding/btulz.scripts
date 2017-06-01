@@ -21,7 +21,7 @@ if "%WORK_FOLDER:~-1%" neq "\" SET WORK_FOLDER=%WORK_FOLDER%\
 echo --工作的目录：%WORK_FOLDER%
 for /f %%l in ('dir /b "%WORK_FOLDER%"') DO (
   SET FOLDER=%WORK_FOLDER%%%l
-  if exist !FOLDER!\.git (  
+  if exist !FOLDER!\.git (
     echo ----开始获取：!FOLDER!
     cd !FOLDER!
     git pull
