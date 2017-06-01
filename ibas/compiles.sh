@@ -1,6 +1,6 @@
 #!/bin/bash
 echo '****************************************************************************'
-echo '              gits_push.sh                                                  '
+echo '              compiles.sh                                                  '
 echo '                      by niuren.zhu                                         '
 echo '                           2017.06.01                                       '
 echo '  说明：                                                                    '
