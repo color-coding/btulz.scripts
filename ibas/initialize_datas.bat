@@ -33,7 +33,7 @@ if not exist "%IBAS_DEPLOY%" (
 )
 REM 设置LIB目录
 SET IBAS_LIB=%2
-if "%IBAS_LIB%" equ "" SET IBAS_LIB=%WORK_FOLDER%IBAS_LIB\
+if "%IBAS_LIB%" equ "" SET IBAS_LIB=%WORK_FOLDER%ibas_lib\
 if not exist "%IBAS_LIB%" mkdir "%IBAS_LIB%"
 
 REM 显示参数信息
