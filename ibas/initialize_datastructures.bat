@@ -25,16 +25,16 @@ if not exist "%TOOLS_TRANSFORM%" (
   goto :EOF
 )
 REM 设置DEPLOY目录
-SET ibas_DEPLOY=%1
-if "%ibas_DEPLOY%" equ "" SET ibas_DEPLOY=%WORK_FOLDER%webapps\
-if not exist "%ibas_DEPLOY%" (
+SET IBAS_DEPLOY=%1
+if "%IBAS_DEPLOY%" equ "" SET IBAS_DEPLOY=%WORK_FOLDER%webapps\
+if not exist "%IBAS_DEPLOY%" (
   echo not found webapps.
   goto :EOF
 )
 REM 设置LIB目录
-SET ibas_lib=%2
-if "%ibas_lib%" equ "" SET ibas_lib=%WORK_FOLDER%ibas_lib\
-if not exist "%ibas_lib%" mkdir "%ibas_lib%"
+SET IBAS_LIB=%2
+if "%IBAS_LIB%" equ "" SET IBAS_LIB=%WORK_FOLDER%IBAS_LIB\
+if not exist "%IBAS_LIB%" mkdir "%IBAS_LIB%"
 REM 数据库信息
 SET CompanyId=CC
 SET MasterDbType=mssql
@@ -48,29 +48,29 @@ SET MasterDbUserPassword=1q2w3e
 REM 显示参数信息
 echo ----------------------------------------------------
 echo 工具地址：%TOOLS_TRANSFORM%
-echo 部署目录：%ibas_DEPLOY%
-echo 共享目录：%ibas_lib%
+echo 部署目录：%IBAS_DEPLOY%
+echo 共享目录：%IBAS_LIB%
 echo ----------------------------------------------------
 
-echo 开始分析[%ibas_DEPLOY%]目录
+echo 开始分析[%IBAS_DEPLOY%]目录
 REM 开始发布当前版本
-if not exist "%ibas_DEPLOY%ibas.release.txt" dir /D /B /A:D "%ibas_DEPLOY%" >"%ibas_DEPLOY%ibas.release.txt"
-for /f %%m in (%ibas_DEPLOY%ibas.release.txt) DO (
+if not exist "%IBAS_DEPLOY%ibas.release.txt" dir /D /B /A:D "%IBAS_DEPLOY%" >"%IBAS_DEPLOY%ibas.release.txt"
+for /f %%m in (%IBAS_DEPLOY%ibas.release.txt) DO (
 echo --开始处理[%%m]
 SET module=%%m
 SET jar=ibas.!module!-*.jar
-if exist "%ibas_DEPLOY%!module!\WEB-INF\app.xml" (
+if exist "%IBAS_DEPLOY%!module!\WEB-INF\app.xml" (
 echo ----读取配置文件[.\WEB-INF\app.xml]
-   call :LOAD_CONF "%ibas_DEPLOY%!module!\WEB-INF\app.xml"
+   call :LOAD_CONF "%IBAS_DEPLOY%!module!\WEB-INF\app.xml"
 )
-if exist "%ibas_DEPLOY%!module!\WEB-INF\lib\!jar!" (
+if exist "%IBAS_DEPLOY%!module!\WEB-INF\lib\!jar!" (
 echo ----开始处理[.\WEB-INF\lib\!jar!]
-for %%f in (%ibas_DEPLOY%!module!\WEB-INF\lib\!jar!) DO (
+for %%f in (%IBAS_DEPLOY%!module!\WEB-INF\lib\!jar!) DO (
    call :CREATE_DS %%f
 ))
-if exist "%ibas_lib%!jar!" (
-echo ----开始处理[%ibas_lib%!jar!]
-for %%f in (%ibas_lib%!jar!) DO (
+if exist "%IBAS_LIB%!jar!" (
+echo ----开始处理[%IBAS_LIB%!jar!]
+for %%f in (%IBAS_LIB%!jar!) DO (
    call :CREATE_DS %%f
 ))
 echo --
