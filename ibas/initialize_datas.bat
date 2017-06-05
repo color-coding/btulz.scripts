@@ -3,7 +3,7 @@ setlocal EnableDelayedExpansion
 echo *****************************************************************
 echo      initialize_datas.bat
 echo                by niuren.zhu
-echo                       2017.03.22
+echo                       2017.06.06
 echo  说明：
 echo     1. 分析jar包并初始化数据，数据库信息取值app.xml。
 echo     2. 参数1，待分析的目录，默认.\webapps。

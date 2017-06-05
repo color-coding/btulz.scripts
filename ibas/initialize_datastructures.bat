@@ -3,7 +3,7 @@ setlocal EnableDelayedExpansion
 echo *****************************************************************
 echo      initialize_datastructures.bat
 echo                by niuren.zhu
-echo                           2016.12.06
+echo                           2017.06.06
 echo  说明：
 echo     1. 分析jar包并创建数据结构，数据库信息取值app.xml。
 echo     2. 参数1，待分析的目录，默认.\webapps。
