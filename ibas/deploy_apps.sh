@@ -28,7 +28,7 @@ if [ ! -e "${IBAS_CONF}" ];then mkdir -p "${IBAS_CONF}"; fi;
 IBAS_DATA=${IBAS_HOME}/data
 if [ ! -e "${IBAS_DATA}" ];then mkdir -p "${IBAS_DATA}"; fi;
 # ibas日志目录
-IBAS_LOG=${IBAS_HOME}/log
+IBAS_LOG=${IBAS_HOME}/logs
 if [ ! -e "${IBAS_LOG}" ];then mkdir -p "${IBAS_LOG}"; fi;
 # 设置IBAS_PACKAGE目录
 IBAS_PACKAGE=$2
@@ -91,7 +91,7 @@ while read file
             ln -s "${IBAS_CONF}/config.json" "${IBAS_DEPLOY}/${folder}/config.json"
         fi;
 # 映射日志文件夹到统一位置
-        if [ -e "${IBAS_DEPLOY}/${folder}/WEB-INF/log" ]; then rm -rf "${IBAS_DEPLOY}/${folder}/WEB-INF/log"; fi;
+        if [ -e "${IBAS_DEPLOY}/${folder}/WEB-INF/logs" ]; then rm -rf "${IBAS_DEPLOY}/${folder}/WEB-INF/logs"; fi;
         ln -s -d "${IBAS_LOG}" "${IBAS_DEPLOY}/${folder}/WEB-INF/"
 # 映射数据文件夹到统一位置
         if [ -e "${IBAS_DEPLOY}/${folder}/WEB-INF/data" ]; then rm -rf "${IBAS_DEPLOY}/${folder}/WEB-INF/data"; fi;

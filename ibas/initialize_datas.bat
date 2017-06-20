@@ -16,7 +16,7 @@ SET h=%time:~0,2%
 SET hh=%h: =0%
 SET DATE_NAME=%date:~0,4%%date:~5,2%%date:~8,2%_%hh%%time:~3,2%%time:~6,2%
 REM 设置参数变量
-SET WORK_FOLDER=%~dp0
+SET WORK_FOLDER=.\
 REM 设置TOOLS目录
 SET TOOLS_FOLDER=%WORK_FOLDER%ibas_tools\
 SET TOOLS_TRANSFORM=%TOOLS_FOLDER%btulz.transforms.bobas-0.1.0.jar
@@ -67,7 +67,7 @@ if exist "%IBAS_DEPLOY%!module!\WEB-INF\app.xml" (
     for %%f in (%IBAS_LIB%*.jar) DO (
        SET "FILE_CLASSES=!FILE_CLASSES!%%f;"
     )
-    for %%f in (%IBAS_LIB%!jar!) DO (
+    for %%f in (%IBAS_LIB%\!jar!) DO (
        call :INIT_DATA "%%f" "!FILE_APP!" "!FILE_CLASSES!"
   ))
 )
@@ -77,15 +77,12 @@ echo 操作完成
 
 goto :EOF
 REM 函数，初始化数据。参数1，分析的jar包 参数2，配置文件 参数3，加载的类库
+REM 注意：命令字符太长，系统不能执行
 :INIT_DATA
   SET JarFile=%1
   SET Config=%2
   SET Classes=%3
-  SET COMMOND=java ^
-    -jar "%TOOLS_TRANSFORM%" init^
-    -data=%JarFile%^
-    -config=%Config%^
-    -classes=%Classes%
+  SET COMMOND=java -jar %TOOLS_TRANSFORM% init -data=%JarFile% -config=%Config% -classes=%Classes%
   echo 运行：%COMMOND%
   call %COMMOND%
 goto :EOF

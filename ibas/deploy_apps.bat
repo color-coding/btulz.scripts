@@ -30,7 +30,7 @@ REM ibas数据目录
 SET IBAS_DATA=%IBAS_HOME%data\
 if not exist "%IBAS_DATA%" mkdir "%IBAS_DATA%"
 REM ibas日志目录
-SET IBAS_LOG=%IBAS_HOME%log\
+SET IBAS_LOG=%IBAS_HOME%logs\
 if not exist "%IBAS_LOG%" mkdir "%IBAS_LOG%"
 REM 设置IBAS_PACKAGE目录
 SET IBAS_PACKAGE=%2
@@ -89,8 +89,8 @@ REM 删除前端配置，并统一到IBAS_CONF目录
             mklink "%IBAS_DEPLOY%!name!\config.json" "%IBAS_CONF%config.json"
         )
 REM 统一日志目录到IBAS_LOG目录
-        if exist "%IBAS_DEPLOY%!name!\WEB-INF\log" rd /s /q "%IBAS_DEPLOY%!name!\WEB-INF\log"
-        mklink /d "%IBAS_DEPLOY%!name!\WEB-INF\log" "%IBAS_LOG%"
+        if exist "%IBAS_DEPLOY%!name!\WEB-INF\logs" rd /s /q "%IBAS_DEPLOY%!name!\WEB-INF\logs"
+        mklink /d "%IBAS_DEPLOY%!name!\WEB-INF\logs" "%IBAS_LOG%"
 REM 统一数据目录到IBAS_DATA目录
         if exist "%IBAS_DEPLOY%!name!\WEB-INF\data" rd /s /q "%IBAS_DEPLOY%!name!\WEB-INF\data"
         mklink /d "%IBAS_DEPLOY%!name!\WEB-INF\data" "%IBAS_DATA%"
