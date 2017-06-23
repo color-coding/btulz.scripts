@@ -1,11 +1,11 @@
 #!/bin/bash
 echo '****************************************************************************'
-echo '              builds.sh                                                     '
+echo '              clears.sh                                                  '
 echo '                      by niuren.zhu                                         '
-echo '                           2017.06.01                                       '
+echo '                           2017.06.23                                       '
 echo '  说明：                                                                    '
-echo '    1. 遍历工作目录，存在build_all.bat则调用。                              '
-echo '    2. 参数1，工作目录。                                                    '
+echo '    1. 遍历工作目录，删除日志文件。                              '
+echo '    2. 参数1，工作目录。                                                     '
 echo '****************************************************************************'
 # 设置参数变量
 # 启动目录
@@ -32,14 +32,8 @@ fi
 # 遍历当前目录存
 while read folder
 do
-  for builder in `find ${WORK_FOLDER}/${folder} -type f -name build_all.sh`
-  do
-# 运行编译命令
-    if [ -x "${builder}" ]
-    then
-      echo --开始构建：${builder}
-      "${builder}" "$(dirname ${builder})"
-    fi
-  done
+  cd ${WORK_FOLDER}/${folder}
+  echo --清理目录：`pwd`
+  rm -f *log*.txt
 done < ${WORK_FOLDER}/compile_order.txt | sed 's/\r//g'
 cd ${WORK_FOLDER}
