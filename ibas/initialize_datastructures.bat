@@ -19,7 +19,7 @@ REM 设置参数变量
 SET WORK_FOLDER=%~dp0
 REM 设置TOOLS目录
 SET TOOLS_FOLDER=%WORK_FOLDER%ibas_tools\
-SET TOOLS_TRANSFORM=%TOOLS_FOLDER%btulz.transforms.core-0.1.0.jar
+SET TOOLS_TRANSFORM=%TOOLS_FOLDER%btulz.transforms.core-0.1.1.jar
 if not exist "%TOOLS_TRANSFORM%" (
   echo not found btulz.transforms.core.
   goto :EOF
