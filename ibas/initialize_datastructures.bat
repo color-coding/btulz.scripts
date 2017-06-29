@@ -93,7 +93,7 @@ REM 函数，创建数据结构。参数1，分析的jar包
     -DsTemplate=ds_%MasterDbType%_ibas_classic.xml^
     -JarFile="%JarFile%"^
     -SqlFilter=sql_%MasterDbType%^
-    -Company=%CompanyId%^
+    -Company=%Company%^
     -DbServer=%MasterDbServer%^
     -DbPort=%MasterDbPort%^
     -DbSchema=%MasterDbSchema%^

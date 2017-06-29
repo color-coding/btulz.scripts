@@ -112,7 +112,7 @@ function createDS()
     -DsTemplate=ds_${MasterDbType}_ibas_classic.xml \
     -JarFile=${JarFile} \
     -SqlFilter=sql_${MasterDbType} \
-    -Company=${CompanyId} \
+    -Company=${Company} \
     -DbServer=${MasterDbServer} \
     -DbPort=${MasterDbPort} \
     -DbSchema=${MasterDbSchema} \
