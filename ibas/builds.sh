@@ -37,8 +37,9 @@ do
 # 运行编译命令
     if [ -x "${builder}" ]
     then
-      echo --开始构建：${builder}
-      "${builder}" "$(dirname ${builder})"
+      echo --开始调用：${builder}
+      "${builder}"
+      echo '****************************************************************************'
     fi
   done
 done < ${WORK_FOLDER}/compile_order.txt | sed 's/\r//g'

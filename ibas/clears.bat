@@ -23,8 +23,18 @@ if not exist "%WORK_FOLDER%compile_order.txt" dir /a:d /b "%WORK_FOLDER%" >"%WOR
 echo --工作的目录：%WORK_FOLDER%
 for /f %%l in (%WORK_FOLDER%compile_order.txt) do (
   SET FOLDER=%WORK_FOLDER%%%l
-  echo ----清理目录：!FOLDER!
+  echo --清理目录：!FOLDER!
   if exist !FOLDER!\*log*.txt (
     del /q !FOLDER!\*log*.txt
   )
+  cd !FOLDER!
+  for /f %%m in ('dir /a:d /b /s 3rdparty') do (
+    SET FOLDER=%%m
+    if !FOLDER:~-25!==\src\main\webapp\3rdparty (
+      echo --清理目录：!FOLDER!
+      if exist !FOLDER!\ibas rd /s /q !FOLDER!\ibas
+      if exist !FOLDER!\openui5 rd /s /q !FOLDER!\openui5
+    )
+  )
 )
+cd %WORK_FOLDER%

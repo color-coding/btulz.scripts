@@ -22,10 +22,15 @@ if not exist "%WORK_FOLDER%compile_order.txt" dir /a:d /b "%WORK_FOLDER%" >"%WOR
 
 echo --工作的目录：%WORK_FOLDER%
 for /f %%l in (%WORK_FOLDER%compile_order.txt) do (
-  for /f %%m in ('dir /s /b "%WORK_FOLDER%%%l\*build_all.bat"') DO (
+  set FOLDER=%%l
+  for /f %%m in ('dir /s /b "%WORK_FOLDER%!FOLDER!\*build_all.bat"') DO (
+    SET FOLDER=%%~pm
     SET BUILDER=%%m
-    echo ----开始构建：!BUILDER!
+    cd /d !FOLDER!
+    echo --开始调用：!BUILDER!
     call !BUILDER!
+    echo ****************************************************************************
   )
 )
+cd /d %WORK_FOLDER%
 cd %WORK_FOLDER%
