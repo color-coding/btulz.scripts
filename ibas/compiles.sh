@@ -32,7 +32,7 @@ fi
 # 遍历当前目录存
 while read folder
 do
-  if [ -x "${WORK_FOLDER}/${folder}/compile_and_package.sh" ]
+  if [ ! -x "${WORK_FOLDER}/${folder}/compile_and_package.sh" ]
   then
     chmod 775 ${WORK_FOLDER}/${folder}/compile_and_package.sh
   fi
