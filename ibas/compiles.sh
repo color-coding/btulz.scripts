@@ -34,9 +34,10 @@ while read folder
 do
   if [ -x "${WORK_FOLDER}/${folder}/compile_and_package.sh" ]
   then
-    cd ${WORK_FOLDER}/${folder}
-    echo ----开始编译：`pwd`
-    "${WORK_FOLDER}/${folder}/compile_and_package.sh" 
+    chmod 775 ${WORK_FOLDER}/${folder}/compile_and_package.sh
   fi
+  cd ${WORK_FOLDER}/${folder}
+  echo ----开始编译：`pwd`
+  "${WORK_FOLDER}/${folder}/compile_and_package.sh" 
 done < ${WORK_FOLDER}/compile_order.txt | sed 's/\r//g'
 cd ${WORK_FOLDER}

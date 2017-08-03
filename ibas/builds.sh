@@ -35,12 +35,13 @@ do
   for builder in `find ${WORK_FOLDER}/${folder} -type f -name build_all.sh`
   do
 # 运行编译命令
-    if [ -x "${builder}" ]
+    if [ ! -x "${builder}" ]
     then
-      echo --开始调用：${builder}
-      "${builder}"
-      echo '****************************************************************************'
+      chmod 775 ${builder}
     fi
+    echo --开始调用：${builder}
+    "${builder}"
+    echo '****************************************************************************'
   done
 done < ${WORK_FOLDER}/compile_order.txt | sed 's/\r//g'
 cd ${WORK_FOLDER}
