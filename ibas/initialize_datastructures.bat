@@ -36,7 +36,7 @@ SET IBAS_LIB=%2
 if "%IBAS_LIB%" equ "" SET IBAS_LIB=%WORK_FOLDER%ibas_lib\
 if not exist "%IBAS_LIB%" mkdir "%IBAS_LIB%"
 REM 数据库信息
-SET CompanyId=CC
+SET Company=CC
 SET MasterDbType=mssql
 SET MasterDbServer=localhost
 SET MasterDbPort=1433
