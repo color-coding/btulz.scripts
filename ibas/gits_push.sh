@@ -4,8 +4,8 @@ echo '              gits_push.sh                                                
 echo '                      by niuren.zhu                                         '
 echo '                           2017.06.01                                       '
 echo '  说明：                                                                    '
-echo '    1. 遍历工作目录，存在.git文件夹则获取最新版。                              '
-echo '    2. 参数1，工作目录。                                                     '
+echo '    1. 遍历工作目录，存在.git文件夹上传到远程仓库。                         '
+echo '    2. 参数1，工作目录。                                                    '
 echo '****************************************************************************'
 # 设置参数变量
 # 启动目录
@@ -30,7 +30,7 @@ do
   if [ -e "${WORK_FOLDER}/${folder}/.git" ]
   then
     cd ${WORK_FOLDER}/${folder}
-    echo ----开始提交：`pwd`
+    echo ----开始上传：`pwd`
     git push
   fi
 done

@@ -23,7 +23,7 @@ echo --工作的目录：%WORK_FOLDER%
 for /f %%l in ('dir /b "%WORK_FOLDER%"') DO (
   SET FOLDER=%WORK_FOLDER%%%l
   if exist !FOLDER!\.git (  
-    echo ----开始提交：!FOLDER!
+    echo ----开始上传：!FOLDER!
     cd !FOLDER!
     git push
   )
