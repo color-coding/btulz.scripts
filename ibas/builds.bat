@@ -33,4 +33,3 @@ for /f %%l in (%WORK_FOLDER%compile_order.txt) do (
   )
 )
 cd /d %WORK_FOLDER%
-cd %WORK_FOLDER%
