@@ -5,7 +5,7 @@ echo              compiles.bat
 echo                     by niuren.zhu
 echo                           2017.05.27
 echo  说明：
-echo     1. 遍历工作目录，存在compile_and_package.bat则调用。
+echo     1. 遍历工作目录，存在compile_packages.bat则调用。
 echo     2. 参数1，工作目录。
 echo ****************************************************************************
 REM 设置参数变量
@@ -23,10 +23,10 @@ if not exist "%WORK_FOLDER%compile_order.txt" dir /a:d /b "%WORK_FOLDER%" >"%WOR
 echo --工作的目录：%WORK_FOLDER%
 for /f %%l in (%WORK_FOLDER%compile_order.txt) do (
   SET FOLDER=%WORK_FOLDER%%%l
-  if exist !FOLDER!\compile_and_package.bat (  
+  if exist !FOLDER!\compile_packages.bat (  
     echo ----开始编译：!FOLDER!
     cd !FOLDER!
-    call !FOLDER!\compile_and_package.bat
+    call !FOLDER!\compile_packages.bat
   )
 )
 cd %WORK_FOLDER%
