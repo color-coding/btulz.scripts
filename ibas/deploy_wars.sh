@@ -24,7 +24,7 @@ REPOSITORY_URL=$2
 if [ "${REPOSITORY_URL}" == "" ];then REPOSITORY_URL=http://maven.colorcoding.org/repository/maven-releases; fi;
 # MAVEN参数信息
 REPOSITORY_ID=ibas-maven
-GROUP_ID=org.colorcoding
+GROUP_ID=org.colorcoding.apps
 
 echo --检查maven运行环境
 mvn -v >/dev/null
