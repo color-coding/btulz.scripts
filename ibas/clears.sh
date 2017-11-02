@@ -38,7 +38,7 @@ do
 # 清理软连接
   for tmp in `find ${WORK_FOLDER}/${folder} -type l`
   do
-    rm ${tmp}
+    rm -f ${tmp}
   done
 done < ${WORK_FOLDER}/compile_order.txt | sed 's/\r//g'
 cd ${WORK_FOLDER}
