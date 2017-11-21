@@ -21,7 +21,7 @@ WORK_FOLDER=`pwd`
 VERSION=$1
 # 仓库地址
 REPOSITORY_URL=$2
-if [ "${REPOSITORY_URL}" == "" ];then REPOSITORY_URL=http://maven.colorcoding.org/repository/maven-releases; fi;
+if [ "${REPOSITORY_URL}" = "" ];then REPOSITORY_URL=http://maven.colorcoding.org/repository/maven-releases; fi;
 # MAVEN参数信息
 REPOSITORY_ID=ibas-maven
 GROUP_ID=org.colorcoding.apps
@@ -45,7 +45,7 @@ do
       # 获取包标识
       ARTIFACT_ID=${PACKAGE##*/}
       ARTIFACT_ID=${ARTIFACT_ID%%-*}
-      if [ "${VERSION}" == "" ]
+      if [ "${VERSION}" = "" ]
       then
           # 未提供版本号，则使用POM文件
           mvn deploy:deploy-file \

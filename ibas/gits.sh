@@ -12,7 +12,7 @@ echo '**************************************************************************
 WORK_FOLDER=`pwd`
 # 命令
 GIT_COMMAND=$@
-if [ "${GIT_COMMAND}" == "" ]
+if [ "${GIT_COMMAND}" = "" ]
 then
     echo 命令无效
     exit 1
