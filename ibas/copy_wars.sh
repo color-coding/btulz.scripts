@@ -37,7 +37,10 @@ fi
 # 遍历当前目录存
 while read folder
 do
-  find ${WORK_FOLDER}/${folder}/release/ -name "*.war" -type f -exec cp {} ${PACKAGES_FOLDER} \;
+  if [ -e ${WORK_FOLDER}/${folder}/release/ ]
+  then
+    find ${WORK_FOLDER}/${folder}/release/ -name "*.war" -type f -exec cp {} ${PACKAGES_FOLDER} \;
+  fi
 done < ${WORK_FOLDER}/compile_order.txt | sed 's/\r//g'
 echo --程序清单：
 ls ${PACKAGES_FOLDER}
