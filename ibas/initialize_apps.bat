@@ -1,11 +1,11 @@
 @echo off
 setlocal EnableDelayedExpansion
 echo *****************************************************************
-echo      initialize_datas.bat
+echo      initialize_apps.bat
 echo                by niuren.zhu
-echo                       2017.06.06
+echo                       2018.01.27
 echo  说明：
-echo     1. 分析jar包并初始化数据，数据库信息取值app.xml。
+echo     1. 分析jar包创建数据结构和初始化数据，数据库信息取值app.xml。
 echo     2. 参数1，待分析的目录，默认.\webapps。
 echo     3. 参数2，共享库目录，默认.\ibas_lib。
 echo     4. 提前下载btulz.transforms并放置.\ibas_tools\目录。
@@ -60,6 +60,7 @@ if exist "%IBAS_DEPLOY%!module!\WEB-INF\app.xml" (
        SET "FILE_CLASSES=!FILE_CLASSES!%%f;"
     )
     for %%f in (%IBAS_DEPLOY%!module!\WEB-INF\lib\!jar!) DO (
+       call :INIT_DS "%%f" "!FILE_APP!"
        call :INIT_DATA "%%f" "!FILE_APP!" "!FILE_CLASSES!"
   ))
   if exist "%IBAS_LIB%!jar!" (
@@ -69,6 +70,7 @@ if exist "%IBAS_DEPLOY%!module!\WEB-INF\app.xml" (
        SET "FILE_CLASSES=!FILE_CLASSES!%%f;"
     )
     for %%f in (%IBAS_LIB%\!jar!) DO (
+       call :INIT_DS "%%f" "!FILE_APP!"
        call :INIT_DATA "%%f" "!FILE_APP!" "!FILE_CLASSES!"
   ))
 )
@@ -84,6 +86,15 @@ REM 注意：命令字符太长，系统不能执行
   SET Config=%2
   SET Classes=%3
   SET COMMOND=java -jar %TOOLS_TRANSFORM% init -data=%JarFile% -config=%Config% -classes=%Classes%
+  echo 运行：%COMMOND%
+  call %COMMOND%
+goto :EOF
+REM 函数，初始化数据。参数1，分析的jar包 参数2，配置文件
+REM 注意：命令字符太长，系统不能执行
+:INIT_DS
+  SET JarFile=%1
+  SET Config=%2
+  SET COMMOND=java -jar %TOOLS_TRANSFORM% ds -data=%JarFile% -config=%Config%
   echo 运行：%COMMOND%
   call %COMMOND%
 goto :EOF
