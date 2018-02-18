@@ -35,11 +35,17 @@ then
   ls -l ${WORK_FOLDER} | awk '/^d/{print $NF}' > ${WORK_FOLDER}/compile_order.txt
 fi
 # 遍历当前目录存
+# 初始化顺序文件
+if [ -e ${PACKAGES_FOLDER}/ibas.deploy.order.txt ]
+then
+  rm -rf ${PACKAGES_FOLDER}/ibas.deploy.order.txt
+fi
 while read folder
 do
   if [ -e ${WORK_FOLDER}/${folder}/release/ ]
   then
     find ${WORK_FOLDER}/${folder}/release/ -name "*.war" -type f -exec cp {} ${PACKAGES_FOLDER} \;
+    find ${WORK_FOLDER}/${folder}/release/ -name "*.war" -type f -exec echo {} \; | awk -F'[/]' '{print $NF}' >> ${PACKAGES_FOLDER}/ibas.deploy.order.txt
   fi
 done < ${WORK_FOLDER}/compile_order.txt | sed 's/\r//g'
 echo --程序清单：

@@ -24,10 +24,13 @@ echo ----------------------------------------------------
 
 if not exist "%WORK_FOLDER%compile_order.txt" dir /a:d /b "%WORK_FOLDER%" >"%WORK_FOLDER%compile_order.txt"
 
+if exist "%PACKAGES_FOLDER%ibas.deploy.order.txt" del /q /f "%PACKAGES_FOLDER%ibas.deploy.order.txt"
+
 for /f %%l in (%WORK_FOLDER%compile_order.txt) do (
   SET FOLDER=%WORK_FOLDER%%%l\release\
-  if exist "!FOLDER!*.war" (  
+  if exist "!FOLDER!*.war" (
     copy /y "!FOLDER!*.war" "%PACKAGES_FOLDER%"
+    dir !FOLDER!*.war >>"%PACKAGES_FOLDER%ibas.deploy.order.txt"
   )
 )
 echo --≥Ã–Ú«Âµ•£∫
