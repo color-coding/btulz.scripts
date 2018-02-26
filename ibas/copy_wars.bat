@@ -30,7 +30,7 @@ for /f %%l in (%WORK_FOLDER%compile_order.txt) do (
   SET FOLDER=%WORK_FOLDER%%%l\release\
   if exist "!FOLDER!*.war" (
     copy /y "!FOLDER!*.war" "%PACKAGES_FOLDER%"
-    dir !FOLDER!*.war >>"%PACKAGES_FOLDER%ibas.deploy.order.txt"
+    dir /b !FOLDER!*.war >>"%PACKAGES_FOLDER%ibas.deploy.order.txt"
   )
 )
 echo --≥Ã–Ú«Âµ•£∫
