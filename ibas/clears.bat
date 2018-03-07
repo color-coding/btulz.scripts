@@ -34,6 +34,7 @@ for /f %%l in (%WORK_FOLDER%compile_order.txt) do (
       echo --ÇåÀíÄ¿Â¼£º!FOLDER!
       if exist !FOLDER!\ibas rd /s /q !FOLDER!\ibas
       if exist !FOLDER!\openui5 rd /s /q !FOLDER!\openui5
+      if exist !FOLDER!\shell rd /s /q !FOLDER!\shell
     )
   )
 )
