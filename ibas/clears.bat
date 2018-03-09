@@ -28,14 +28,10 @@ for /f %%l in (%WORK_FOLDER%compile_order.txt) do (
     del /q !FOLDER!\*log*.txt
   )
   cd !FOLDER!
-  for /f %%m in ('dir /a:d /b /s 3rdparty') do (
+  for /f %%m in ('dir /a:ld /b /s !FOLDER!') do (
     SET FOLDER=%%m
-    if !FOLDER:~-25!==\src\main\webapp\3rdparty (
-      echo --清理目录：!FOLDER!
-      if exist !FOLDER!\ibas rd /s /q !FOLDER!\ibas
-      if exist !FOLDER!\openui5 rd /s /q !FOLDER!\openui5
-      if exist !FOLDER!\shell rd /s /q !FOLDER!\shell
-    )
+    echo --清理符号链接：!FOLDER!
+    rd /s /q !FOLDER!
   )
 )
 cd %WORK_FOLDER%

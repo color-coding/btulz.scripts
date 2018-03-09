@@ -35,9 +35,10 @@ do
   cd ${WORK_FOLDER}/${folder}
   echo --清理目录：`pwd`
   rm -f *log*.txt
-# 清理软连接
+# 清理符号链接
   for tmp in `find ${WORK_FOLDER}/${folder} -type l`
   do
+    echo --清理符号链接：${tmp}
     rm -f ${tmp}
   done
 done < ${WORK_FOLDER}/compile_order.txt | sed 's/\r//g'
