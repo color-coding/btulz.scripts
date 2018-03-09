@@ -27,11 +27,12 @@ for /f %%l in (%WORK_FOLDER%compile_order.txt) do (
   if exist !FOLDER!\*log*.txt (
     del /q !FOLDER!\*log*.txt
   )
-  cd !FOLDER!
+REM 清理符号链接
   for /f %%m in ('dir /a:ld /b /s !FOLDER!') do (
     SET FOLDER=%%m
-    echo ----清理符号链接：!FOLDER!
-    rd /s /q !FOLDER! > nul
+    if exist !FOLDER! (
+      rd /s /q !FOLDER! > nul
+    )
   )
 )
 cd %WORK_FOLDER%

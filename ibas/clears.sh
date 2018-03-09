@@ -38,8 +38,10 @@ do
 # 清理符号链接
   for tmp in `find ${WORK_FOLDER}/${folder} -type l`
   do
-    echo ----清理符号链接：${tmp}
-    rm -f ${tmp} > /dev/null
+    if [ -e ${tmp} ]
+    then
+      rm -f ${tmp} > /dev/null
+    fi
   done
 done < ${WORK_FOLDER}/compile_order.txt | sed 's/\r//g'
 cd ${WORK_FOLDER}
