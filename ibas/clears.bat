@@ -30,8 +30,8 @@ for /f %%l in (%WORK_FOLDER%compile_order.txt) do (
   cd !FOLDER!
   for /f %%m in ('dir /a:ld /b /s !FOLDER!') do (
     SET FOLDER=%%m
-    echo --清理符号链接：!FOLDER!
-    rd /s /q !FOLDER!
+    echo ----清理符号链接：!FOLDER!
+    rd /s /q !FOLDER! > nul
   )
 )
 cd %WORK_FOLDER%
