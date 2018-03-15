@@ -4,7 +4,7 @@ echo '                  compress.sh                                             
 echo '                       by niuren.zhu                                        '
 echo '                           2018.03.15                                       '
 echo '  说明：                                                                    '
-echo '    1. 遍历工作目录，压缩tsconfig.json所在目录js文件。                      '
+echo '    1. 遍历工作目录，压缩*.js文件为*.min.js文件。                      '
 echo '    2. 参数1，工作目录。                                                    '
 echo '****************************************************************************'
 # 设置参数变量
@@ -41,17 +41,11 @@ fi
 # 遍历当前目录
 while read module
 do
-  for folder in `find ${WORK_FOLDER}/${module} -type d -name webapp`
+  for file in `find ${WORK_FOLDER}/${module} -type f -name *.js ! -name *.min.js ! -path "*3rdparty*"`
   do
-    if [ -e ${folder}/tsconfig.json ]
-    then
-      for file in `find ${folder} -type f -maxdepth 1 -name *.js`
-      do
-        echo --压缩：${file}
-        cp -f ${file} ${file}-dbg
-        uglifyjs ${file}
-      done
-    fi
+    compressed=${file%%.js*}.min.js
+    echo --压缩：${file}
+    uglifyjs --compress --keep-classnames --keep-fnames --mangle --output ${compressed} ${file}
   done
 done < ${WORK_FOLDER}/compile_order.txt | sed 's/\r//g'
 cd ${WORK_FOLDER}
