@@ -3,9 +3,9 @@ echo '**************************************************************************
 echo '              compiles.sh                                                   '
 echo '                      by niuren.zhu                                         '
 echo '                           2017.06.01                                       '
-echo '  说明：                                                                     '
-echo '    1. 遍历工作目录，存在compile_packages.bat则调用。                           '
-echo '    2. 参数1，工作目录。                                                       '
+echo '  说明：                                                                    '
+echo '    1. 遍历工作目录，存在compile_packages.bat则调用。                       '
+echo '    2. 参数1，工作目录。                                                    '
 echo '****************************************************************************'
 # 设置参数变量
 # 启动目录
@@ -29,7 +29,7 @@ if [ ! -e ${WORK_FOLDER}/compile_order.txt ]
 then
   ls -l ${WORK_FOLDER} | awk '/^d/{print $NF}' > ${WORK_FOLDER}/compile_order.txt
 fi
-# 遍历当前目录存
+# 遍历当前目录
 while read folder
 do
   if [ -e ${WORK_FOLDER}/${folder}/compile_packages.sh ]

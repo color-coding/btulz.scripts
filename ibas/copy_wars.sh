@@ -34,7 +34,7 @@ if [ ! -e ${WORK_FOLDER}/compile_order.txt ]
 then
   ls -l ${WORK_FOLDER} | awk '/^d/{print $NF}' > ${WORK_FOLDER}/compile_order.txt
 fi
-# 遍历当前目录存
+# 遍历当前目录
 # 初始化顺序文件
 if [ -e ${PACKAGES_FOLDER}/ibas.deploy.order.txt ]
 then

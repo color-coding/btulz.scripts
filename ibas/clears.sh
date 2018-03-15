@@ -29,7 +29,7 @@ if [ ! -e ${WORK_FOLDER}/compile_order.txt ]
 then
   ls -l ${WORK_FOLDER} | awk '/^d/{print $NF}' > ${WORK_FOLDER}/compile_order.txt
 fi
-# 遍历当前目录存
+# 遍历当前目录
 while read folder
 do
   cd ${WORK_FOLDER}/${folder}

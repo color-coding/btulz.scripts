@@ -20,7 +20,7 @@ fi
 
 echo --工作目录：${WORK_FOLDER}
 echo --批量指令：git ${GIT_COMMAND}
-# 遍历当前目录存
+# 遍历当前目录
 for folder in `ls -l "${WORK_FOLDER}" | awk '/^d/{print $NF}'`
 do
   if [ -e "${WORK_FOLDER}/${folder}/.git" ]
