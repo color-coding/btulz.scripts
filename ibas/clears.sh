@@ -35,6 +35,7 @@ do
   cd ${WORK_FOLDER}/${folder}
   echo --清理目录：`pwd`
   rm -f *log*.txt
+  rm -rf release
 # 清理符号链接
   for tmp in `find ${WORK_FOLDER}/${folder} -type l`
   do

@@ -27,6 +27,9 @@ for /f %%l in (%WORK_FOLDER%compile_order.txt) do (
   if exist !FOLDER!\*log*.txt (
     del /q !FOLDER!\*log*.txt
   )
+  if exist !FOLDER!\release (
+    rd /q /s !FOLDER!\release
+  )
 REM «Â¿Ì∑˚∫≈¡¥Ω”
   for /f %%m in ('dir /a:ld /b /s !FOLDER!') do (
     SET FOLDER=%%m
