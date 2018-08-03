@@ -1,0 +1,7 @@
+# files
+*_log_*.txt
+*.tmp
+*.tar
+
+# release folder
+/release/
