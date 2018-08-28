@@ -56,7 +56,7 @@ REM 遍历当前目录
       if "!DONE!"=="true" (
         set COMPRESSED=!FILE:~0,-3!.min.js
         echo --开始压缩：!FILE!
-        call uglifyjs --compress --keep-classnames --keep-fnames --mangle --output !COMPRESSED! !FILE!
+        call uglifyjs --compress --safari10 --keep-classnames --keep-fnames --mangle --output !COMPRESSED! !FILE!
       )
     )
   )
