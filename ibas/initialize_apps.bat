@@ -45,34 +45,51 @@ echo 共享目录：%IBAS_LIB%
 echo ----------------------------------------------------
 
 echo 开始分析[%IBAS_DEPLOY%]目录
+SET db_jar=bobas.businessobjectscommon.db.*.jar
 REM 开始发布当前版本
 if not exist "%IBAS_DEPLOY%ibas.release.txt" dir /D /B /A:D "%IBAS_DEPLOY%" >"%IBAS_DEPLOY%ibas.release.txt"
 for /f %%m in (%IBAS_DEPLOY%ibas.release.txt) DO (
 echo --开始处理[%%m]
 SET module=%%m
-SET jar=ibas.!module!-*.jar
+SET module_jar=ibas.!module!-*.jar
 if exist "%IBAS_DEPLOY%!module!\WEB-INF\app.xml" (
   SET FILE_APP=%IBAS_DEPLOY%!module!\WEB-INF\app.xml
-  if exist "%IBAS_DEPLOY%!module!\WEB-INF\lib\!jar!" (
-    echo ----开始处理[.\WEB-INF\lib\!jar!]
+  if exist "%IBAS_DEPLOY%!module!\WEB-INF\lib\!db_jar!" (
+    echo ----开始处理[.\WEB-INF\lib\!db_jar!]
+    for %%f in (%IBAS_DEPLOY%!module!\WEB-INF\lib\!db_jar!) DO (
+       call :INIT_DS "%%f" "!FILE_APP!"
+    )
+  )
+  if exist "%IBAS_DEPLOY%!module!\WEB-INF\lib\!module_jar!" (
+    echo ----开始处理[.\WEB-INF\lib\!module_jar!]
     SET FILE_CLASSES=
     for %%f in (%IBAS_DEPLOY%!module!\WEB-INF\lib\*.jar) DO (
        SET "FILE_CLASSES=!FILE_CLASSES!%%f;"
     )
-    for %%f in (%IBAS_DEPLOY%!module!\WEB-INF\lib\!jar!) DO (
+    for %%f in (%IBAS_DEPLOY%!module!\WEB-INF\lib\!module_jar!) DO (
        call :INIT_DS "%%f" "!FILE_APP!"
        call :INIT_DATA "%%f" "!FILE_APP!" "!FILE_CLASSES!"
-  ))
-  if exist "%IBAS_LIB%!jar!" (
-    echo ----开始处理[%IBAS_LIB%!jar!]
+    )
+  )
+REM 共享目录处理
+  if exist "%IBAS_LIB%!db_jar!" (
+    echo ----开始处理[%IBAS_LIB%!db_jar!]
+    for %%f in (%IBAS_LIB%!db_jar!) DO (
+       call :INIT_DS "%%f" "!FILE_APP!"
+    )
+    SET db_jar=__DONE__
+  )
+  if exist "%IBAS_LIB%!module_jar!" (
+    echo ----开始处理[%IBAS_LIB%!module_jar!]
     SET FILE_CLASSES=
     for %%f in (%IBAS_LIB%*.jar) DO (
        SET "FILE_CLASSES=!FILE_CLASSES!%%f;"
     )
-    for %%f in (%IBAS_LIB%\!jar!) DO (
+    for %%f in (%IBAS_LIB%!module_jar!) DO (
        call :INIT_DS "%%f" "!FILE_APP!"
        call :INIT_DATA "%%f" "!FILE_APP!" "!FILE_CLASSES!"
-  ))
+    )
+  )
 )
 echo --
 )

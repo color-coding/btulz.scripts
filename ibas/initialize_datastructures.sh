@@ -126,6 +126,7 @@ function createDS()
 }
 
 echo 开始分析${IBAS_DEPLOY}目录下数据
+db_jar=bobas\.businessobjectscommon\.db\.
 # 检查是否存在模块说明文件，此文件描述模块初始化顺序。
 if [ ! -e "${IBAS_DEPLOY}/ibas.release.txt" ]
 then
@@ -142,21 +143,30 @@ do
 # 使用模块目录jar包
     if [ -e "${IBAS_DEPLOY}/${folder}/WEB-INF/lib" ]
     then
+      for file in `ls "${IBAS_DEPLOY}/${folder}/WEB-INF/lib" | grep ${db_jar}`
+      do
+        echo ----${file}
+        createDS ${IBAS_DEPLOY}/${folder}/WEB-INF/lib/${file};
+      done
       for file in `ls "${IBAS_DEPLOY}/${folder}/WEB-INF/lib" | grep ibas\.${folder}\-.`
       do
         echo ----${file}
         createDS ${IBAS_DEPLOY}/${folder}/WEB-INF/lib/${file};
-        echo ----
       done
     fi;
 # 使用共享目录jar包
     if [ -e "${IBAS_LIB}" ]
     then
+      for file in `ls "${IBAS_LIB}" | grep ${db_jar}`
+      do
+        echo ----${file}
+        createDS ${IBAS_LIB}/${file};
+      done
+      db_jar=__DONE__
       for file in `ls "${IBAS_LIB}" | grep ibas\.${folder}\-.`
       do
         echo ----${file}
         createDS ${IBAS_LIB}/${file};
-        echo ----
       done
     fi;
     echo --

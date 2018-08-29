@@ -54,27 +54,43 @@ echo 共享目录：%IBAS_LIB%
 echo ----------------------------------------------------
 
 echo 开始分析[%IBAS_DEPLOY%]目录
+SET db_jar=bobas.businessobjectscommon.db.*.jar
 REM 开始发布当前版本
 if not exist "%IBAS_DEPLOY%ibas.release.txt" dir /D /B /A:D "%IBAS_DEPLOY%" >"%IBAS_DEPLOY%ibas.release.txt"
 for /f %%m in (%IBAS_DEPLOY%ibas.release.txt) DO (
-echo --开始处理[%%m]
-SET module=%%m
-SET jar=ibas.!module!-*.jar
-if exist "%IBAS_DEPLOY%!module!\WEB-INF\app.xml" (
-echo ----读取配置文件[.\WEB-INF\app.xml]
-   call :LOAD_CONF "%IBAS_DEPLOY%!module!\WEB-INF\app.xml"
-)
-if exist "%IBAS_DEPLOY%!module!\WEB-INF\lib\!jar!" (
-echo ----开始处理[.\WEB-INF\lib\!jar!]
-for %%f in (%IBAS_DEPLOY%!module!\WEB-INF\lib\!jar!) DO (
-   call :CREATE_DS %%f
-))
-if exist "%IBAS_LIB%!jar!" (
-echo ----开始处理[%IBAS_LIB%!jar!]
-for %%f in (%IBAS_LIB%!jar!) DO (
-   call :CREATE_DS %%f
-))
-echo --
+  echo --开始处理[%%m]
+  SET module=%%m
+  SET module_jar=ibas.!module!-*.jar
+  if exist "%IBAS_DEPLOY%!module!\WEB-INF\app.xml" (
+    echo ----读取配置文件[.\WEB-INF\app.xml]
+      call :LOAD_CONF "%IBAS_DEPLOY%!module!\WEB-INF\app.xml"
+  )
+  if exist "%IBAS_DEPLOY%!module!\WEB-INF\lib\!db_jar!" (
+    echo ----开始处理[.\WEB-INF\lib\!db_jar!]
+    for %%f in (%IBAS_DEPLOY%!module!\WEB-INF\lib\!db_jar!) DO (
+      call :CREATE_DS %%f
+    )
+  )
+  if exist "%IBAS_DEPLOY%!module!\WEB-INF\lib\!module_jar!" (
+    echo ----开始处理[.\WEB-INF\lib\!module_jar!]
+    for %%f in (%IBAS_DEPLOY%!module!\WEB-INF\lib\!module_jar!) DO (
+      call :CREATE_DS %%f
+    )
+  )
+  if exist "%IBAS_LIB%!db_jar!" (
+    echo ----开始处理[%IBAS_LIB%!db_jar!]
+    for %%f in (%IBAS_LIB%!db_jar!) DO (
+       call :CREATE_DS %%f
+    )
+    SET db_jar=__DONE__
+  )
+  if exist "%IBAS_LIB%!module_jar!" (
+    echo ----开始处理[%IBAS_LIB%!module_jar!]
+    for %%f in (%IBAS_LIB%!module_jar!) DO (
+      call :CREATE_DS %%f
+    )
+  )
+  echo --
 )
 echo 操作完成
 
@@ -134,9 +150,9 @@ goto :EOF
 REM 函数，去除空格及制表符。参数1，处理的变量名
 :TRIM
 if "!%1:~0,1!"==" " (set %1=!%1:~1!&&goto TRIM)
-if "!%1:~0,1!"=="	" (set %1=!%1:~1!&&goto TRIM)
+if "!%1:~0,1!"=="  " (set %1=!%1:~1!&&goto TRIM)
 if "!%1:~-1!"==" " (set %1=!%1:~0,-1!&&goto TRIM)
-if "!%1:~-1!"=="	" (set %1=!%1:~0,-1!&&goto TRIM)
+if "!%1:~-1!"=="  " (set %1=!%1:~0,-1!&&goto TRIM)
 goto :EOF
 REM 函数，大写字母转小写。参数1，处理的变量名
 :TO_UPPERCASE

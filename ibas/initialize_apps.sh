@@ -39,6 +39,7 @@ echo 共享目录：${IBAS_LIB}
 echo ----------------------------------------------------
 
 echo 开始分析${IBAS_DEPLOY}目录下数据
+db_jar=bobas\.businessobjectscommon\.db\.
 # 检查是否存在模块说明文件，此文件描述模块初始化顺序。
 if [ ! -e "${IBAS_DEPLOY}/ibas.release.txt" ]
 then
@@ -53,6 +54,13 @@ do
 # 使用模块目录jar包
       if [ -e "${IBAS_DEPLOY}/${folder}/WEB-INF/lib" ]
       then
+        for file in `ls "${IBAS_DEPLOY}/${folder}/WEB-INF/lib" | grep ${db_jar}`
+        do
+          echo ----${file}
+          FILE_DATA=${IBAS_DEPLOY}/${folder}/WEB-INF/lib/${file}
+          echo ----开始创建数据结构
+          java -jar ${TOOLS_TRANSFORM} ds "-data=${FILE_DATA}" "-config=${FILE_APP}"
+        done
         FILE_CLASSES=
         for file in `ls "${IBAS_DEPLOY}/${folder}/WEB-INF/lib" | grep \..jar`
         do
@@ -66,12 +74,19 @@ do
           java -jar ${TOOLS_TRANSFORM} ds "-data=${FILE_DATA}" "-config=${FILE_APP}"
           echo ----开始初始化数据
           java -jar ${TOOLS_TRANSFORM} init "-data=${FILE_DATA}" "-config=${FILE_APP}" "-classes=${FILE_CLASSES}"
-          echo ----
         done
       fi;
 # 使用共享目录jar包
       if [ -e "${IBAS_LIB}" ]
       then
+        for file in `ls "${IBAS_LIB}" | grep ${db_jar}`
+        do
+          echo ----${file}
+          FILE_DATA=${IBAS_LIB}/${file};
+          echo ----开始创建数据结构
+          java -jar ${TOOLS_TRANSFORM} ds "-data=${FILE_DATA}" "-config=${FILE_APP}"
+        done
+        db_jar=__DONE__
         FILE_CLASSES=
         for file in `ls "${IBAS_LIB}" | grep \..jar`
         do
@@ -85,7 +100,6 @@ do
           java -jar ${TOOLS_TRANSFORM} ds "-data=${FILE_DATA}" "-config=${FILE_APP}"
           echo ----开始初始化数据
           java -jar ${TOOLS_TRANSFORM} init "-data=${FILE_DATA}" "-config=${FILE_APP}" "-classes=${FILE_CLASSES}"
-          echo ----
         done
       fi;
     fi;
