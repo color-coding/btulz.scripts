@@ -19,12 +19,12 @@ SET WORK_FOLDER=%~dp0
 echo --当前工作的目录是[%WORK_FOLDER%]
 
 echo --清除项目缓存
-if exist %WORK_FOLDER%release\ rd /s /q %WORK_FOLDER%release\
-if not exist %WORK_FOLDER%release md %WORK_FOLDER%release
+if exist %WORK_FOLDER%release\ rd /s /q %WORK_FOLDER%release\ >nul
+if not exist %WORK_FOLDER%release md %WORK_FOLDER%release >nul
 
 echo --压缩文件为tar包
 7z a -ttar btulz.scripts.tar ibas\*.sh ibas\*.bat
-copy /y btulz.scripts.tar %WORK_FOLDER%release\
+copy /y btulz.scripts.tar %WORK_FOLDER%release\ >nul
 del /q btulz.scripts.tar
 
 echo --编译完成
