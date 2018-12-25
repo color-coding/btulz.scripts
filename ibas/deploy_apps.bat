@@ -6,7 +6,7 @@ echo                  by niuren.zhu
 echo                          2017.06.18
 echo  说明：
 echo     1. 部署IBAS的WAR包到应用目录，需要以管理员权限启动。
-echo     2. 参数1，IBCP数据目录，默认.\ibas。
+echo     2. 参数1，IBAS数据目录，默认.\ibas。
 echo     3. 参数2，IBAS的包位置，默认.\ibas_packages。
 echo     4. 参数3，IBAS部署目录，默认.\webapps。
 echo     5. 参数4，IBAS共享库目录，默认.\ibas_lib。
