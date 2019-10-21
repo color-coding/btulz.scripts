@@ -44,7 +44,7 @@ do
     do
       # 获取包标识
       ARTIFACT_ID=${PACKAGE##*/}
-      ARTIFACT_ID=${ARTIFACT_ID%%-*}
+      ARTIFACT_ID=${ARTIFACT_ID%-*}
       if [ "${VERSION}" = "" ]
       then
           # 未提供版本号，则使用POM文件

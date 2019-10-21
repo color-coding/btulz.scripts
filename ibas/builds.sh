@@ -59,7 +59,7 @@ do
 # 遍历当前目录
     for file in `find ${WORK_FOLDER}/${folder} -type f -name *.js ! -name *.min.js ! -path "*3rdparty*" ! -path "*openui5/resources*" ! -path "*target*"`
     do
-      compressed=${file%%.js*}.min.js
+      compressed=${file%.js*}.min.js
       echo --开始压缩：${file}
       uglifyjs --compress --safari10 --keep-classnames --keep-fnames --mangle --output ${compressed} ${file}
     done

@@ -63,11 +63,11 @@ fi;
 echo 开始解压模块，到目录${IBAS_DEPLOY}
 while read file
     do
-        file=${file%%.war*}.war
+        file=${file%.war*}.war
         echo 释放"${IBAS_PACKAGE}/${file}"
 # 修正war包的解压目录
         folder=${file##*ibas.}
-        folder=${folder%%.service*}
+        folder=${folder%.service*}
 # 记录释放的目录到ibas.release.txt，此文件为部署顺序说明。
         if [ ! -e "${IBAS_DEPLOY}/ibas.release.txt" ]; then :>"${IBAS_DEPLOY}/ibas.release.txt"; fi;
         grep -q ${folder} "${IBAS_DEPLOY}/ibas.release.txt" || echo "${folder}" >>"${IBAS_DEPLOY}/ibas.release.txt"
@@ -111,5 +111,8 @@ while read file
 # 备份顺序文件
 mv "${IBAS_PACKAGE}/ibas.deploy.order.txt" ${IBAS_PACKAGE_BACKUP}/ibas.deploy.order.txt
 # 修正ROOT目录
-if [ -e "${IBAS_DEPLOY}/root" ]; then mv "${IBAS_DEPLOY}/root" "${IBAS_DEPLOY}/ROOT"; fi;
+if [ -e "${IBAS_DEPLOY}/root" ]; then
+  if [ -e "${IBAS_DEPLOY}/ROOT" ]; then rm -rf "${IBAS_DEPLOY}/ROOT"; fi;
+  mv "${IBAS_DEPLOY}/root" "${IBAS_DEPLOY}/ROOT";
+fi;
 echo 操作完成
