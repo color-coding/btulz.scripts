@@ -78,7 +78,7 @@ do
         do
           FILE_CLASSES=${FILE_CLASSES}${IBAS_DEPLOY}/${folder}/WEB-INF/lib/${file}\\\;;
         done
-        for file in `ls "${IBAS_DEPLOY}/${folder}/WEB-INF/lib" | grep ibas\.${folder}\-.`
+        for file in `ls "${IBAS_DEPLOY}/${folder}/WEB-INF/lib" | grep ibas\.${folder}\.`
         do
           echo ----${file}
           FILE_DATA=${IBAS_DEPLOY}/${folder}/WEB-INF/lib/${file}
@@ -94,7 +94,7 @@ do
         do
           FILE_CLASSES=${FILE_CLASSES}${IBAS_LIB}/${file}\\\;;
         done
-        for file in `ls "${IBAS_LIB}" | grep ibas\.${folder}\-.`
+        for file in `ls "${IBAS_LIB}" | grep ibas\.${folder}\.`
         do
           echo ----${file}
           FILE_DATA=${IBAS_LIB}/${file};

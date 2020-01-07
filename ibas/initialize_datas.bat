@@ -50,7 +50,7 @@ if not exist "%IBAS_DEPLOY%ibas.release.txt" dir /D /B /A:D "%IBAS_DEPLOY%" >"%I
 for /f %%m in (%IBAS_DEPLOY%ibas.release.txt) DO (
 echo --开始处理[%%m]
 SET module=%%m
-SET jar=ibas.!module!-*.jar
+SET jar=ibas.!module!*.jar
 if exist "%IBAS_DEPLOY%!module!\WEB-INF\app.xml" (
   SET FILE_APP=%IBAS_DEPLOY%!module!\WEB-INF\app.xml
   if exist "%IBAS_DEPLOY%!module!\WEB-INF\lib\!jar!" (
