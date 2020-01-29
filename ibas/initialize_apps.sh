@@ -31,8 +31,11 @@ fi;
 IBAS_LIB=$2
 if [ "${IBAS_LIB}" = "" ];then IBAS_LIB=${WORK_FOLDER}/ibas_lib; fi;
 
+# 开始时间
+START_TIME=`date +'%Y-%m-%d %H:%M:%S'`
 # 显示参数信息
 echo ----------------------------------------------------
+echo 开始时间：${START_TIME}
 echo 工具地址：${TOOLS_TRANSFORM}
 echo 部署目录：${IBAS_DEPLOY}
 echo 共享目录：${IBAS_LIB}
@@ -105,4 +108,14 @@ do
     fi;
     echo --
   done < "${IBAS_DEPLOY}/ibas.release.txt" | sed 's/\r//g' | sed 's/\n//g'
-echo 操作完成
+# 计算执行时间
+END_TIME=`date +'%Y-%m-%d %H:%M:%S'`
+if [ "`uname`" = "Darwin" ]; then
+# macOS
+  START_SECONDS=$(date -j -f "%Y-%m-%d %H:%M:%S" "$START_TIME" +%s);
+  END_SECONDS=$(date -j -f "%Y-%m-%d %H:%M:%S" "$END_TIME" +%s);
+else
+  START_SECONDS=$(date --date="$START_TIME" +%s);
+  END_SECONDS=$(date --date="$END_TIME" +%s);
+fi;
+echo 完成时间：${END_TIME}，共$((END_SECONDS-START_SECONDS))秒

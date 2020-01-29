@@ -23,7 +23,10 @@ then
   WORK_FOLDER=${STARTUP_FOLDER}
 fi
 
-echo --工作的目录：${WORK_FOLDER}
+# 开始时间
+START_TIME=`date +'%Y-%m-%d %H:%M:%S'`
+echo --开始时间：${START_TIME}
+echo --工作目录：${WORK_FOLDER}
 # 获取编译顺序
 if [ ! -e ${WORK_FOLDER}/compile_order.txt ]
 then
@@ -44,3 +47,14 @@ do
   fi
 done < ${WORK_FOLDER}/compile_order.txt | sed 's/\r//g'
 cd ${WORK_FOLDER}
+# 计算执行时间
+END_TIME=`date +'%Y-%m-%d %H:%M:%S'`
+if [ "`uname`" = "Darwin" ]; then
+# macOS
+  START_SECONDS=$(date -j -f "%Y-%m-%d %H:%M:%S" "$START_TIME" +%s);
+  END_SECONDS=$(date -j -f "%Y-%m-%d %H:%M:%S" "$END_TIME" +%s);
+else
+  START_SECONDS=$(date --date="$START_TIME" +%s);
+  END_SECONDS=$(date --date="$END_TIME" +%s);
+fi;
+echo --结束时间：${END_TIME}，共$((END_SECONDS-START_SECONDS))秒
