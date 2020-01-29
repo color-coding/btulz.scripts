@@ -112,7 +112,10 @@ while read file
 mv "${IBAS_PACKAGE}/ibas.deploy.order.txt" ${IBAS_PACKAGE_BACKUP}/ibas.deploy.order.txt
 # 修正ROOT目录
 if [ -e "${IBAS_DEPLOY}/root" ]; then
-  if [ -e "${IBAS_DEPLOY}/ROOT" ]; then rm -rf "${IBAS_DEPLOY}/ROOT"; fi;
+  if [ ! -e "${WORK_FOLDER}/IBAS_PACKAGES" ]; then
+# 大小写不敏感环境
+    if [ -e "${IBAS_DEPLOY}/ROOT" ]; then rm -rf "${IBAS_DEPLOY}/ROOT"; fi;
+  fi;
   mv "${IBAS_DEPLOY}/root" "${IBAS_DEPLOY}/ROOT";
 fi;
 echo 操作完成
