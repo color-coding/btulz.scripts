@@ -1,12 +1,11 @@
-#!/bin/sh
+#!/bin/bash
 echo '****************************************************************************'
 echo '                 startcat.sh                                                '
 echo '                      by niuren.zhu                                         '
-echo '                           2020.02.27                                       '
+echo '                           2020.08.26                                       '
 echo '  说明：                                                                     '
-echo '    1. 启动Tomcat。                                                          '
-echo '    2. 参数1，配置文件分组。（app.[demo].xml，app.[dev].xml）                   '
-echo '    3. 参数2，数据库配置。(app.demo.[mysql].xml，app.dev.[mysql].xml)          '
+echo '    1. 列示并选择配置文件。                                                    '
+echo '    2. 启动Tomcat。                                                          '
 echo '****************************************************************************'
 # 设置参数变量
 # 启动目录
@@ -21,63 +20,55 @@ if [ ! -e ${TOMCAT} ]; then
   echo --没有TOMCAT启动脚本
   exit 0
 fi
-# 参数赋值
-CONFIG_GROUP=$1
-CONFIG_DB=$2
-if [ "${CONFIG_GROUP}" = "" ]; then
-  echo --启动Tomcat
-  "${TOMCAT}"
-  exit 0
-fi
-# 配置文件名
-FILE_APP_XML=app
-FILE_CONFIG_JSON=config
-FILE_SERVICE_ROUTING_XML=service_routing
-# 补全文件名
-if [ ! "${CONFIG_GROUP}" = "" ]; then
-  FILE_APP_XML=${FILE_APP_XML}.${CONFIG_GROUP}
-  FILE_CONFIG_JSON=${FILE_CONFIG_JSON}.${CONFIG_GROUP}
-  FILE_SERVICE_ROUTING_XML=${FILE_SERVICE_ROUTING_XML}.${CONFIG_GROUP}
-fi
-if [ ! "${CONFIG_DB}" = "" ]; then
-  FILE_APP_XML=${FILE_APP_XML}.${CONFIG_DB}
-fi
-FILE_APP_XML=${FILE_APP_XML}.xml
-FILE_CONFIG_JSON=${FILE_CONFIG_JSON}.json
-FILE_SERVICE_ROUTING_XML=${FILE_SERVICE_ROUTING_XML}.xml
-# 应用配置文件
-echo --前端配置：${FILE_CONFIG_JSON}
-echo --后端配置：${FILE_APP_XML}
-echo --路由配置：${FILE_SERVICE_ROUTING_XML}
-APP_XML=app.xml
-CONFIG_JSON=config.json
-SERVICE_ROUTING_XML=service_routing.xml
-# 备份上次配置
-LAST_SIGN=~last
-if [ -e "${CONFIG_FOLDER}/${APP_XML}" ]; then
-  rm -f "${CONFIG_FOLDER}/${LAST_SIGN}.${APP_XML}"
-  cp "${CONFIG_FOLDER}/${APP_XML}" "${CONFIG_FOLDER}/${LAST_SIGN}.${APP_XML}"
-fi
-if [ -e "${CONFIG_FOLDER}/${CONFIG_JSON}" ]; then
-  rm -f "${CONFIG_FOLDER}/${LAST_SIGN}.${CONFIG_JSON}"
-  cp "${CONFIG_FOLDER}/${CONFIG_JSON}" "${CONFIG_FOLDER}/${LAST_SIGN}.${CONFIG_JSON}"
-fi
-if [ -e "${CONFIG_FOLDER}/${SERVICE_ROUTING_XML}" ]; then
-  rm -f "${CONFIG_FOLDER}/${LAST_SIGN}.${SERVICE_ROUTING_XML}"
-  cp "${CONFIG_FOLDER}/${SERVICE_ROUTING_XML}" "${CONFIG_FOLDER}/${LAST_SIGN}.${SERVICE_ROUTING_XML}"
-fi
-# 覆盖当前配置
-if [ -e "${CONFIG_FOLDER}/${FILE_APP_XML}" ]; then
-  rm -f "${CONFIG_FOLDER}/${APP_XML}"
-  cp "${CONFIG_FOLDER}/${FILE_APP_XML}" "${CONFIG_FOLDER}/${APP_XML}"
-fi
-if [ -e "${CONFIG_FOLDER}/${FILE_CONFIG_JSON}" ]; then
-  rm -f "${CONFIG_FOLDER}/${CONFIG_JSON}"
-  cp "${CONFIG_FOLDER}/${FILE_CONFIG_JSON}" "${CONFIG_FOLDER}/${CONFIG_JSON}"
-fi
-if [ -e "${CONFIG_FOLDER}/${FILE_SERVICE_ROUTING_XML}" ]; then
-  rm -f "${CONFIG_FOLDER}/${SERVICE_ROUTING_XML}"
-  cp "${CONFIG_FOLDER}/${FILE_SERVICE_ROUTING_XML}" "${CONFIG_FOLDER}/${SERVICE_ROUTING_XML}"
-fi
+
+# 函数：列示并选择文件
+chooseFile() {
+  FILE_FOLDER=$1
+  FILE_TYPE=$2
+  FILES=()
+  INDEX=0
+  echo --文件类型：${FILE_TYPE}
+  echo --列示目录：${FILE_FOLDER}
+  for FILE in $(ls ${FILE_FOLDER}/${FILE_TYPE//./*}); do
+    if [ "${FILE}" != "${FILE_FOLDER}/${FILE_TYPE}" ]; then
+      FILES[$INDEX]=$FILE
+      INDEX=$(expr $INDEX + 1)
+    fi
+  done
+  echo --检索到[${#FILES[@]}]个文件：
+  for INDEX in "${!FILES[@]}"; do
+    printf "  %s) %s\n" "$(expr $INDEX + 1)" "${FILES[$INDEX]}"
+  done
+  printf "  %s) %s\n" "0" "${FILE_FOLDER}/~last.${FILE_TYPE}"
+  read -p "--请输入选择的文件序号: " INDEX
+  if [ "${INDEX}" = "" ]; then
+    CHS_FILE=
+  elif [ "${INDEX}" = "0" ]; then
+    CHS_FILE=${FILE_FOLDER}/~last.${FILE_TYPE}
+  else
+    CHS_FILE=${FILES[$(expr $INDEX - 1)]}
+  fi
+  if [ -e "${CHS_FILE}" ]; then
+    echo --应用文件：${CHS_FILE}
+    cp -f "${FILE_FOLDER}/${FILE_TYPE}" "${FILE_FOLDER}/~last.${FILE_TYPE}"
+    cp -f "${CHS_FILE}" "${FILE_FOLDER}/${FILE_TYPE}"
+  else
+    echo --未选择\&跳过
+  fi
+}
+
+# 选择文件
+echo --后端配置文件选择
+chooseFile "${CONFIG_FOLDER}" "app.xml"
+echo
+
+echo --服务路由文件选择
+chooseFile "${CONFIG_FOLDER}" "service_routing.xml"
+echo
+
+echo --前端配置文件选择
+chooseFile "${CONFIG_FOLDER}" "config.json"
+echo
+
 echo --启动Tomcat
 "${TOMCAT}"
