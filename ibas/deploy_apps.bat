@@ -105,7 +105,70 @@ REM 备份程序包
     )
 )
 REM 备份顺序文件
-move "%IBAS_PACKAGE%ibas.deploy.order.txt" "%IBAS_PACKAGE_BACKUP%ibas.deploy.order.txt"
+move "%IBAS_PACKAGE%ibas.deploy.order.txt" "%IBAS_PACKAGE_BACKUP%ibas.deploy.order.txt" > nul
 REM 修正ROOT目录
-if exist "%IBAS_DEPLOY%root" rename "%IBAS_DEPLOY%root" ROOT
+if exist "%IBAS_DEPLOY%root" rename "%IBAS_DEPLOY%root" ROOT > nul
+
+REM 共享jar包旧版清理
+if exist "%IBAS_LIB%" (
+  echo 清理[ibas_lib]旧版文件
+  if exist "%IBAS_LIB%\~file_types.txt" (del /s /q "%IBAS_LIB%\~file_types.txt" > nul && echo.>"%IBAS_LIB%\~file_types.txt")
+  for /f %%m in ('dir /b /o-n "%IBAS_LIB%\*.jar"') do (
+    set file=%%m
+    call :PosLastChar !file! - length
+    call :GetChar !file! !length! file_type
+	find "#!file_type!#" "%IBAS_LIB%\~file_types.txt" > nul && (
+      echo --清理[!file!]
+	  del /s /q "%IBAS_LIB%\!file!"
+      echo !file! >>"%IBAS_LIB%\~deleted_files.txt"
+	) || (
+      echo #!file_type!# >>"%IBAS_LIB%\~file_types.txt"
+	)
+  )
+)
 echo 操作完成
+goto :eof
+rem :get char to pos
+:GetChar
+set SubStr=%1
+set SubStr=!SubStr:~0,%2!
+set %3=!SubStr!
+goto :eof
+
+rem :poschar str tag Res
+:PosChar
+set SubStr=
+set F=0 
+set TmpVar=%1
+set %3=-1
+:pos_begin
+set SubStr=!TmpVar:~%F%,1!
+if not defined substr goto :post_end 
+if "%SubStr%"=="%2" (
+set %3=%f%
+goto :post_end
+) else (
+set /a f=%f%+1
+goto :pos_begin
+)
+:post_end
+goto :eof
+rem :PosLastChar str tag Res
+:PosLastChar
+set SubStr=
+set F=0 
+set TmpVar=%1
+set %3=-1
+:PosLastCharBegin
+set SubStr=!TmpVar:~%F%,1!
+if not defined substr goto :PosLastCharEnd 
+if "%SubStr%"=="%2" (
+set %3=%f%
+set /a f=%f%+1
+goto :PosLastCharBegin
+) else (
+set /a f=%f%+1
+goto :PosLastCharBegin
+)
+:PosLastCharEnd
+goto :eof
