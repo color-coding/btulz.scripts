@@ -12,12 +12,11 @@ echo '    5. 此脚本会遍历当前目录的子目录，查找pom.xml并编译
 echo '    6. 可在compile_order.txt文件中调整编译顺序。                            '
 echo '****************************************************************************'
 # 设置参数变量
-WORK_FOLDER=`pwd`
+WORK_FOLDER=$(pwd)
 echo --当前工作的目录是[${WORK_FOLDER}]
 
 echo --清除项目缓存
-if [ -e ${WORK_FOLDER}/release/ ]
-then
+if [ -e ${WORK_FOLDER}/release/ ]; then
   rm -rf ${WORK_FOLDER}/release/
 fi
 mkdir -p ${WORK_FOLDER}/release/

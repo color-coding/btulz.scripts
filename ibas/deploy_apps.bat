@@ -96,6 +96,7 @@ REM 统一数据目录到IBAS_DATA目录
         mklink /d "%IBAS_DEPLOY%!name!\WEB-INF\data" "%IBAS_DATA%"
 REM 统一lib目录到运行目录
         if exist "%IBAS_DEPLOY%!name!\WEB-INF\lib\*.jar" (
+            dir "%IBAS_DEPLOY%!name!\WEB-INF\lib\*.jar" >file_list.txt
             copy /y "%IBAS_DEPLOY%!name!\WEB-INF\lib\*.jar" "%IBAS_LIB%"
             del /q "%IBAS_DEPLOY%!name!\WEB-INF\lib\*.jar"
         )
