@@ -55,19 +55,13 @@ if exist "%IBAS_DEPLOY%!module!\WEB-INF\app.xml" (
   SET FILE_APP=%IBAS_DEPLOY%!module!\WEB-INF\app.xml
   if exist "%IBAS_DEPLOY%!module!\WEB-INF\lib\!jar!" (
     echo ----开始处理[.\WEB-INF\lib\!jar!]
-    SET FILE_CLASSES=
-    for %%f in (%IBAS_DEPLOY%!module!\WEB-INF\lib\*.jar) DO (
-       SET "FILE_CLASSES=!FILE_CLASSES!%%f;"
-    )
+    SET FILE_CLASSES=%IBAS_DEPLOY%!module!\WEB-INF\lib\
     for %%f in (%IBAS_DEPLOY%!module!\WEB-INF\lib\!jar!) DO (
        call :INIT_DATA "%%f" "!FILE_APP!" "!FILE_CLASSES!"
   ))
   if exist "%IBAS_LIB%!jar!" (
     echo ----开始处理[%IBAS_LIB%!jar!]
-    SET FILE_CLASSES=
-    for %%f in (%IBAS_LIB%*.jar) DO (
-       SET "FILE_CLASSES=!FILE_CLASSES!%%f;"
-    )
+    SET FILE_CLASSES=%IBAS_LIB%
     for %%f in (%IBAS_LIB%\!jar!) DO (
        call :INIT_DATA "%%f" "!FILE_APP!" "!FILE_CLASSES!"
   ))
