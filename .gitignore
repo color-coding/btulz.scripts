@@ -2,9 +2,10 @@
 *_log_*.txt
 *.tmp
 *.tar
+~*
 
 # release folder
-/release/
+release/
 
 # mac os files
 .DS_Store
