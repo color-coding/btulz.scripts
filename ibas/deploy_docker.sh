@@ -10,6 +10,7 @@ echo '    3. 应用配置及数据文件，在网站目录的ibas目录。      
 echo '    4. 脚本会自动在root/conf.d，创建网站的nginx配置。                            '
 echo '    5. 若开启容器管理平台，可以通过索引页链接打开。                                '
 echo '    6. 若开启Tomcat远程诊断，可以用jconsole连接，注意端口冲突。                    '
+echo '    7. 网站目录host文件会自动添加到容器。                                        '
 echo '****************************************************************************'
 # 设置参数变量
 WORK_FOLDER=$PWD
@@ -100,7 +101,43 @@ EOF
         MEM_TOMCAT=1024
     fi
     MEM_JAVA=$(expr ${MEM_TOMCAT} - 128)
-
+    # 使用host
+    if [ -e ${WORK_FOLDER}/${WEBSITE}/hosts ]; then
+        read -p "----检测到host文件是否使用？（[n] or y）: " USE_HOSTS
+        if [ "${USE_HOSTS}" = "y" ]; then
+            HOST_TOMCAT=
+            while read HOST; do
+                if [ "${HOST}" == "" ]; then
+                    continue
+                fi
+                if [[ ${HOST} == \#* ]]; then
+                    continue
+                fi
+                HOST_IP=$(echo ${HOST} | cut -d " " -f 1)
+                if [ "${HOST_IP}" == "" ]; then
+                    continue
+                fi
+                if [ "${HOST_IP}" == "::1" ]; then
+                    continue
+                fi
+                if [ "${HOST_IP}" == "127.0.0.1" ]; then
+                    continue
+                fi
+                if [ "${HOST_IP}" == "255.255.255.255" ]; then
+                    continue
+                fi
+                HOST_NAME=$(echo ${HOST} | cut -d " " -f 2)
+                if [ "${HOST_NAME}" == "" ]; then
+                    continue
+                fi
+                if [ "${HOST_NAME}" == "localhost" ]; then
+                    continue
+                fi
+                HOST_TOMCAT=$(echo ${HOST_TOMCAT} --add-host=${HOST_NAME}:${HOST_IP})
+            done <"${WORK_FOLDER}/${WEBSITE}/hosts"
+        fi
+    fi
+    # 使用镜像
     if [ -e ${WORK_FOLDER}/${WEBSITE}/CONTAINER_IMAGE ]; then
         DEF_IMAGE_TOMCAT=$(cat ${WORK_FOLDER}/${WEBSITE}/CONTAINER_IMAGE)
     fi
@@ -122,6 +159,7 @@ EOF
         -e JAVA_OPTS="-Xmx${MEM_JAVA}m" \
         --privileged=true \
         ${DOCKER_JMX} \
+        ${HOST_TOMCAT} \
         ${IMAGE_TOMCAT}
     echo ${IMAGE_TOMCAT} >${WORK_FOLDER}/${WEBSITE}/CONTAINER_IMAGE
 else

@@ -10,6 +10,7 @@ echo '    2. 运行前，自主把应用war包，拷贝至网站目录下的ibas_packages下。
 echo '    3. 应用配置及数据文件，在网站目录的ibas目录。
 echo '    4. 脚本会自动在root\conf.d，创建网站的nginx配置。
 echo '    5. 若开启Tomcat远程诊断，可以用jconsole连接，注意端口冲突。
+echo '    6. 网站目录host文件会自动添加到容器（貌似windows不支持）。
 echo **************************************************************************************
 rem 设置参数变量
 set WORK_FOLDER=%~dp0
@@ -67,7 +68,44 @@ if "%RESET_TOMCAT%" equ "y" (
     if "%MEM_TOMCAT%" equ "" (
         set MEM_TOMCAT=1024
     )
-    set /a MEM_JAVA=!MEM_TOMCAT! - 128    
+    set /a MEM_JAVA=!MEM_TOMCAT! - 128
+    if exist "%WORK_FOLDER%\%WEBSITE%\hosts" (
+REM 貌似windows版不支持
+        set /p USE_HOSTS=----检测到host文件是否使用？（[n] or y）:
+        if "!USE_HOSTS!" equ "y" (
+            for /f "delims=" %%m in (%WORK_FOLDER%\%WEBSITE%\hosts) DO (
+                set HOST=%%m
+                if "!HOST:~0,1!" neq "#" (
+                    set DONE=YES
+                    for /f "tokens=1,2,*" %%a in ("!HOST!") do (
+                        set HOST_IP=%%a
+                        set HOST_NAME=%%b
+                    )
+                    if "!HOST_IP!" equ "" (
+                        set DONE=NO
+                    )
+                    if "!HOST_IP!" equ "::1" (
+                        set DONE=NO
+                    )
+                    if "!HOST_IP!" equ "127.0.0.1" (
+                        set DONE=NO
+                    )
+                    if "!HOST_IP!" equ "255.255.255.255" (
+                        set DONE=NO
+                    )
+                    if "!HOST_NAME!" equ "" (
+                        set DONE=NO
+                    )
+                    if "!HOST_NAME!" equ "localhost" (
+                        set DONE=NO
+                    )
+                    if "!DONE!" equ "YES" (
+                        set HOST_TOMCAT=!HOST_TOMCAT! --add-host=!HOST_NAME!:!HOST_IP!
+                    )
+                )
+            )
+        )
+    )
     if exist "%WORK_FOLDER%\%WEBSITE%\CONTAINER_IMAGE" (
         set /P DEF_IMAGE_TOMCAT=<"%WORK_FOLDER%\%WEBSITE%\CONTAINER_IMAGE"
     )
@@ -84,6 +122,7 @@ if "%RESET_TOMCAT%" equ "y" (
         -m !MEM_TOMCAT!m ^
         -v "%WORK_FOLDER%\%WEBSITE%\ibas:C:\apache-tomcat\ibas" ^
         -v "%WORK_FOLDER%\%WEBSITE%\ibas_packages:C:\apache-tomcat\ibas_packages" ^
+        !HOST_TOMCAT! ^
         !IMAGE_TOMCAT!
     echo !IMAGE_TOMCAT!>"%WORK_FOLDER%\%WEBSITE%\CONTAINER_IMAGE"
 ) else (
