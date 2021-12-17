@@ -61,7 +61,7 @@ echo ----------------------------------------------------
 
 echo 开始解压[%IBAS_PACKAGE%]的war包
 REM 开始发布当前版本
-if not exist "%IBAS_PACKAGE%ibas.deploy.order.txt" dir /b "%IBAS_PACKAGE%ibas.*.war" >"%IBAS_PACKAGE%ibas.deploy.order.txt"
+if not exist "%IBAS_PACKAGE%ibas.deploy.order.txt" dir /b /od "%IBAS_PACKAGE%ibas.*.war" >"%IBAS_PACKAGE%ibas.deploy.order.txt"
 for /f %%m in (%IBAS_PACKAGE%ibas.deploy.order.txt) DO (
     echo --开始处理[%%m]
     SET module=%%m
@@ -70,35 +70,38 @@ REM echo !name! REM 此处有个坑，文件名后几位不是.service-X.X.X.war格式就挂了。
     if exist "%IBAS_PACKAGE%%%m" (
         echo !name!>>"%IBAS_DEPLOY%ibas.release.txt"
         %TOOL_7Z% x "%IBAS_PACKAGE%%%m" -r -y -o"%IBAS_DEPLOY%!name!"
+REM 存在WEB安全目录
+        if exist "%IBAS_DEPLOY%!name!\WEB-INF\" (
 REM 删除配置文件，并统一到IBAS_CONF目录
-        if exist "%IBAS_DEPLOY%!name!\WEB-INF\app.xml" (
-            if not exist "%IBAS_CONF%app.xml" copy /y "%IBAS_DEPLOY%!name!\WEB-INF\app.xml" "%IBAS_CONF%app.xml"
-            del /q "%IBAS_DEPLOY%!name!\WEB-INF\app.xml"
-            mklink "%IBAS_DEPLOY%!name!\WEB-INF\app.xml" "%IBAS_CONF%app.xml"
-        )
+            if exist "%IBAS_DEPLOY%!name!\WEB-INF\app.xml" (
+                if not exist "%IBAS_CONF%app.xml" copy /y "%IBAS_DEPLOY%!name!\WEB-INF\app.xml" "%IBAS_CONF%app.xml"
+                del /q "%IBAS_DEPLOY%!name!\WEB-INF\app.xml"
+                mklink "%IBAS_DEPLOY%!name!\WEB-INF\app.xml" "%IBAS_CONF%app.xml"
+            )
 REM 删除路由文件，并统一到IBAS_CONF目录
-        if exist "%IBAS_DEPLOY%!name!\WEB-INF\service_routing.xml" (
-            if not exist "%IBAS_CONF%service_routing.xml" copy /y "%IBAS_DEPLOY%!name!\WEB-INF\service_routing.xml" "%IBAS_CONF%service_routing.xml"
-            del /q "%IBAS_DEPLOY%!name!\WEB-INF\service_routing.xml"
-            mklink "%IBAS_DEPLOY%!name!\WEB-INF\service_routing.xml" "%IBAS_CONF%service_routing.xml"
+            if exist "%IBAS_DEPLOY%!name!\WEB-INF\service_routing.xml" (
+                if not exist "%IBAS_CONF%service_routing.xml" copy /y "%IBAS_DEPLOY%!name!\WEB-INF\service_routing.xml" "%IBAS_CONF%service_routing.xml"
+                del /q "%IBAS_DEPLOY%!name!\WEB-INF\service_routing.xml"
+                mklink "%IBAS_DEPLOY%!name!\WEB-INF\service_routing.xml" "%IBAS_CONF%service_routing.xml"
+            )
+REM 统一日志目录到IBAS_LOG目录
+            if exist "%IBAS_DEPLOY%!name!\WEB-INF\logs" rd /s /q "%IBAS_DEPLOY%!name!\WEB-INF\logs"
+            mklink /d "%IBAS_DEPLOY%!name!\WEB-INF\logs" "%IBAS_LOG%"
+REM 统一数据目录到IBAS_DATA目录
+            if exist "%IBAS_DEPLOY%!name!\WEB-INF\data" rd /s /q "%IBAS_DEPLOY%!name!\WEB-INF\data"
+            mklink /d "%IBAS_DEPLOY%!name!\WEB-INF\data" "%IBAS_DATA%"
+REM 统一lib目录到运行目录
+            if exist "%IBAS_DEPLOY%!name!\WEB-INF\lib\*.jar" (
+                dir "%IBAS_DEPLOY%!name!\WEB-INF\lib\*.jar" >file_list.txt
+                copy /y "%IBAS_DEPLOY%!name!\WEB-INF\lib\*.jar" "%IBAS_LIB%"
+                del /q "%IBAS_DEPLOY%!name!\WEB-INF\lib\*.jar"
+            )
         )
 REM 删除前端配置，并统一到IBAS_CONF目录
         if exist "%IBAS_DEPLOY%!name!\config.json" (
             if not exist "%IBAS_CONF%config.json" copy /y "%IBAS_DEPLOY%!name!\config.json" "%IBAS_CONF%config.json"
             del /q "%IBAS_DEPLOY%!name!\config.json"
             mklink "%IBAS_DEPLOY%!name!\config.json" "%IBAS_CONF%config.json"
-        )
-REM 统一日志目录到IBAS_LOG目录
-        if exist "%IBAS_DEPLOY%!name!\WEB-INF\logs" rd /s /q "%IBAS_DEPLOY%!name!\WEB-INF\logs"
-        mklink /d "%IBAS_DEPLOY%!name!\WEB-INF\logs" "%IBAS_LOG%"
-REM 统一数据目录到IBAS_DATA目录
-        if exist "%IBAS_DEPLOY%!name!\WEB-INF\data" rd /s /q "%IBAS_DEPLOY%!name!\WEB-INF\data"
-        mklink /d "%IBAS_DEPLOY%!name!\WEB-INF\data" "%IBAS_DATA%"
-REM 统一lib目录到运行目录
-        if exist "%IBAS_DEPLOY%!name!\WEB-INF\lib\*.jar" (
-            dir "%IBAS_DEPLOY%!name!\WEB-INF\lib\*.jar" >file_list.txt
-            copy /y "%IBAS_DEPLOY%!name!\WEB-INF\lib\*.jar" "%IBAS_LIB%"
-            del /q "%IBAS_DEPLOY%!name!\WEB-INF\lib\*.jar"
         )
 REM 备份程序包
         move "%IBAS_PACKAGE%%%m" "%IBAS_PACKAGE_BACKUP%%%m"
@@ -112,7 +115,8 @@ if exist "%IBAS_DEPLOY%root" rename "%IBAS_DEPLOY%root" ROOT > nul
 REM 共享jar包旧版清理
 if exist "%IBAS_LIB%" (
   echo 清理[ibas_lib]旧版文件
-  if exist "%IBAS_LIB%\~file_types.txt" (del /s /q "%IBAS_LIB%\~file_types.txt" > nul && echo.>"%IBAS_LIB%\~file_types.txt")
+  if exist "%IBAS_LIB%\~file_types.txt" (del /s /q "%IBAS_LIB%\~file_types.txt" > nul)
+  echo.>"%IBAS_LIB%\~file_types.txt"
   for /f %%m in ('dir /b /o-n "%IBAS_LIB%\*.jar"') do (
     set file=%%m
     call :PosLastChar !file! - length

@@ -275,7 +275,7 @@ location /sap/byd/cn/ {
     }
 
     rewrite ^/sap/byd/cn/(my[0-9]+)/(.*)\$ /\$2 break;
-    proxy_pass  https://\$1.sapbyd.cn/\$2;
+    proxy_pass  https://\$1.sapbyd.cn/\$2\?$args;
     proxy_cookie_path /sap/ap/ui/login /;
 }
 EOF

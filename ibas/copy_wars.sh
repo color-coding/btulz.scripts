@@ -28,7 +28,7 @@ echo --工作的目录：${WORK_FOLDER}
 echo --程序的目录：${PACKAGES_FOLDER}
 # 获取编译顺序
 if [ ! -e ${WORK_FOLDER}/compile_order.txt ]; then
-  ls -l ${WORK_FOLDER} | awk '/^d/{print $NF}' >${WORK_FOLDER}/compile_order.txt
+  ls -ltr ${WORK_FOLDER} | awk '/^d/{print $NF}' >${WORK_FOLDER}/compile_order.txt
 fi
 # 遍历当前目录
 # 初始化顺序文件

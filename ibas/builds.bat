@@ -28,7 +28,7 @@ if "%ERRORLEVEL%"=="0" (
   echo 请先安装压缩工具[npm install uglify-es -g]
 )
 
-if not exist "%WORK_FOLDER%compile_order.txt" dir /a:d /b "%WORK_FOLDER%" >"%WORK_FOLDER%compile_order.txt"
+if not exist "%WORK_FOLDER%compile_order.txt" dir /a:d /b /od "%WORK_FOLDER%" >"%WORK_FOLDER%compile_order.txt"
 
 for /f %%l in (%WORK_FOLDER%compile_order.txt) do (
   set FOLDER=%%l

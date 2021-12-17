@@ -47,7 +47,7 @@ echo ----------------------------------------------------
 echo 开始分析[%IBAS_DEPLOY%]目录
 SET db_jar=bobas.businessobjectscommon.db.*.jar
 REM 开始发布当前版本
-if not exist "%IBAS_DEPLOY%ibas.release.txt" dir /D /B /A:D "%IBAS_DEPLOY%" >"%IBAS_DEPLOY%ibas.release.txt"
+if not exist "%IBAS_DEPLOY%ibas.release.txt" dir /D /B /OD /A:D "%IBAS_DEPLOY%" >"%IBAS_DEPLOY%ibas.release.txt"
 for /f %%m in (%IBAS_DEPLOY%ibas.release.txt) DO (
 echo --开始处理[%%m]
 SET module=%%m

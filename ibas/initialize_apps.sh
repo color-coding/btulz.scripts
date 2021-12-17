@@ -45,7 +45,7 @@ echo 开始分析${IBAS_DEPLOY}目录下数据
 db_jar=bobas\.businessobjectscommon\.db\.
 # 检查是否存在模块说明文件，此文件描述模块初始化顺序。
 if [ ! -e "${IBAS_DEPLOY}/ibas.release.txt" ]; then
-  ls -l "${IBAS_DEPLOY}" | awk '/^d/{print $NF}' >"${IBAS_DEPLOY}/ibas.release.txt"
+  ls -ltr "${IBAS_DEPLOY}" | awk '/^d/{print $NF}' >"${IBAS_DEPLOY}/ibas.release.txt"
 fi
 while read folder; do
   echo --${folder}

@@ -24,7 +24,7 @@ fi
 echo --工作的目录：${WORK_FOLDER}
 # 获取编译顺序
 if [ ! -e ${WORK_FOLDER}/compile_order.txt ]; then
-  ls -l ${WORK_FOLDER} | awk '/^d/{print $NF}' >${WORK_FOLDER}/compile_order.txt
+  ls -lt ${WORK_FOLDER} | awk '/^d/{print $NF}' >${WORK_FOLDER}/compile_order.txt
 fi
 # 遍历当前目录
 while read folder; do

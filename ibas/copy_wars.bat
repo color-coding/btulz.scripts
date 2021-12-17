@@ -22,15 +22,15 @@ echo --工作的目录：%WORK_FOLDER%
 echo --程序的目录：%PACKAGES_FOLDER%
 echo ----------------------------------------------------
 
-if not exist "%WORK_FOLDER%compile_order.txt" dir /a:d /b "%WORK_FOLDER%" >"%WORK_FOLDER%compile_order.txt"
+if not exist "%WORK_FOLDER%compile_order.txt" dir /a:d /b /od "%WORK_FOLDER%" >"%WORK_FOLDER%compile_order.txt"
 
 if exist "%PACKAGES_FOLDER%ibas.deploy.order.txt" del /q /f "%PACKAGES_FOLDER%ibas.deploy.order.txt"
 
 for /f %%l in (%WORK_FOLDER%compile_order.txt) do (
   SET FOLDER=%WORK_FOLDER%%%l\release\
-  if exist "!FOLDER!.service-*.war" (
-    copy /y "!FOLDER!.service-*.war" "%PACKAGES_FOLDER%"
-    dir /b !FOLDER!.service-*.war >>"%PACKAGES_FOLDER%ibas.deploy.order.txt"
+  if exist "!FOLDER!*.service-*.war" (
+    copy /y "!FOLDER!*.service-*.war" "%PACKAGES_FOLDER%"
+    dir /b !FOLDER!*.service-*.war >>"%PACKAGES_FOLDER%ibas.deploy.order.txt"
   )
 )
 echo --程序清单：

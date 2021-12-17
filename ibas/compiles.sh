@@ -22,7 +22,7 @@ if [ "${COMPILE_ORDER}" = "" ]; then
   # 没提供编译内容，则使用文件
   if [ ! -e ${WORK_FOLDER}/compile_order.txt ]; then
     # 文件不存在，先构建
-    ls -l ${WORK_FOLDER} | awk '/^d/{print $NF}' >${WORK_FOLDER}/compile_order.txt
+    ls -ltr ${WORK_FOLDER} | awk '/^d/{print $NF}' >${WORK_FOLDER}/compile_order.txt
   fi
   COMPILE_ORDER=$(cat ${WORK_FOLDER}/compile_order.txt)
 fi
