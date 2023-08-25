@@ -116,12 +116,14 @@ REM 貌似windows版不支持
     if "!IMAGE_TOMCAT!" equ "" (
         set IMAGE_TOMCAT=!DEF_IMAGE_TOMCAT!
     )
+    set /p STARTUP_PARS=----其他启动参数 :
     docker rm -vf %CONTAINER_TOMCAT%
     docker run -d ^
         --name %CONTAINER_TOMCAT% ^
         -m !MEM_TOMCAT!m ^
         -v "%WORK_FOLDER%\%WEBSITE%\ibas:C:\apache-tomcat\ibas" ^
         -v "%WORK_FOLDER%\%WEBSITE%\ibas_packages:C:\apache-tomcat\ibas_packages" ^
+        !STARTUP_PARS! ^
         !HOST_TOMCAT! ^
         !IMAGE_TOMCAT!
     echo !IMAGE_TOMCAT!>"%WORK_FOLDER%\%WEBSITE%\CONTAINER_IMAGE"

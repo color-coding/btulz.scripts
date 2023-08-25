@@ -148,6 +148,7 @@ EOF
     if [ "${IMAGE_TOMCAT}" = "" ]; then
         IMAGE_TOMCAT=${DEF_IMAGE_TOMCAT}
     fi
+    read -p "----其他启动参数？: " STARTUP_PARS
     docker rm -vf ${CONTAINER_TOMCAT} >/dev/null
     docker run -d \
         --name ${CONTAINER_TOMCAT} \
@@ -157,6 +158,7 @@ EOF
         --link ${CONTAINER_DATABASE}:${CONTAINER_DATABASE} \
         -e TZ="Asia/Shanghai" \
         -e JAVA_OPTS="-Xmx${MEM_JAVA}m" \
+        ${STARTUP_PARS} \
         --privileged=true \
         ${DOCKER_JMX} \
         ${HOST_TOMCAT} \
