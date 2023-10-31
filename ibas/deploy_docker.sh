@@ -107,30 +107,30 @@ EOF
         if [ "${USE_HOSTS}" = "y" ]; then
             HOST_TOMCAT=
             while read HOST; do
-                if [ "${HOST}" == "" ]; then
+                if [ "${HOST}" = "" ]; then
                     continue
                 fi
-                if [[ ${HOST} == \#* ]]; then
+                if [[ ${HOST} = \#* ]]; then
                     continue
                 fi
                 HOST_IP=$(echo ${HOST} | cut -d " " -f 1)
-                if [ "${HOST_IP}" == "" ]; then
+                if [ "${HOST_IP}" = "" ]; then
                     continue
                 fi
-                if [ "${HOST_IP}" == "::1" ]; then
+                if [ "${HOST_IP}" = "::1" ]; then
                     continue
                 fi
-                if [ "${HOST_IP}" == "127.0.0.1" ]; then
+                if [ "${HOST_IP}" = "127.0.0.1" ]; then
                     continue
                 fi
-                if [ "${HOST_IP}" == "255.255.255.255" ]; then
+                if [ "${HOST_IP}" = "255.255.255.255" ]; then
                     continue
                 fi
                 HOST_NAME=$(echo ${HOST} | cut -d " " -f 2)
-                if [ "${HOST_NAME}" == "" ]; then
+                if [ "${HOST_NAME}" = "" ]; then
                     continue
                 fi
-                if [ "${HOST_NAME}" == "localhost" ]; then
+                if [ "${HOST_NAME}" = "localhost" ]; then
                     continue
                 fi
                 HOST_TOMCAT=$(echo ${HOST_TOMCAT} --add-host=${HOST_NAME}:${HOST_IP})
@@ -237,6 +237,8 @@ server {
     ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
     ssl_prefer_server_ciphers on;
 
+    client_max_body_size 10m;
+
     location / {
         root   /usr/share/nginx/html;
         index  index.html index.htm;
@@ -299,21 +301,24 @@ location /${WEBSITE}/ {
 }
 EOF
 fi
+# 链接容器
+LINK_CONTAINER=
+# 链接应用
+LINK_APPS=
 # 容器管理平台索引
 if [ -e ${WORK_FOLDER}/portainer ]; then
     PORTAINER_PORT=$(docker inspect --format='{{(index (index .NetworkSettings.Ports "9000/tcp") 0).HostPort}}' portainer || echo "")
-    LINK_PORTAINER="<p><a href=":${PORTAINER_PORT}" target="_blank">Portainer</a></p>"
+    LINK_APPS="${LINK_APPS} <p><a href=\":${PORTAINER_PORT}\" target=\"_blank\">Portainer</a></p>"
 fi
 # 如果未获取到端口则不生成索引
 if [ "${PORTAINER_PORT}" = "" ]; then
-    LINK_PORTAINER=
+    LINK_APPS=
+    LINK_CONTAINER=
 fi
 # 重新创建根网站容器
-LINK_TOMCATS=
-LINK_APPS=
 for ITEM in $(docker ps --format "table {{.Names}}" | grep ibas-tomcat-); do
-    LINK_TOMCATS="${LINK_TOMCATS} --link ${ITEM}"
-    LINK_APPS="${LINK_APPS} <p><a href="${ITEM:12}" target="_blank">${ITEM:12}</a>  ($(docker inspect -f {{.Created}} ${ITEM}))</p>"
+    LINK_CONTAINER="${LINK_CONTAINER} --link ${ITEM}"
+    LINK_APPS="${LINK_APPS} <p><a href=\"${ITEM:12}\" target=\"_blank\">${ITEM:12}</a>  ($(docker inspect -f {{.Created}} ${ITEM}))</p>"
 done
 # 应用索引文件
 cat >${WORK_FOLDER}/root/index.html <<EOF
@@ -331,7 +336,6 @@ cat >${WORK_FOLDER}/root/index.html <<EOF
 </head>
 <body>
     <h1>Welcome to ibas apps!</h1>
-    ${LINK_PORTAINER}
     ${LINK_APPS}
 </body>
 <script>
@@ -356,8 +360,8 @@ docker run -d \
     -v ${NGINX_CONFD}:/etc/nginx/conf.d/ \
     -v ${NGINX_CERT}:/etc/nginx/cert/ \
     -v ${WORK_FOLDER}/root/index.html:/usr/share/nginx/html/index.html \
-    ${LINK_TOMCATS} \
+    ${LINK_CONTAINER} \
     --privileged=true \
-    nginx:alpine
+    colorcoding/nginx:alpine
 echo --网站地址：http://${NGINX_NAME}:${NGINX_PORT_HTTP}/${WEBSITE}/
 echo --网站地址：https://${NGINX_NAME}:${NGINX_PORT_HTTPS}/${WEBSITE}/

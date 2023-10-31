@@ -201,6 +201,7 @@ if not exist "%NGINX_CONFD%\default.conf" (
     echo        ssl_ciphers ECDHE-RSA-AES128-GCM-SHA256:ECDHE:ECDH:AES:HIGH:!NULL:!aNULL:!MD5:!ADH:!RC4; >>!OUT_PUT!
     echo        ssl_protocols TLSv1 TLSv1.1 TLSv1.2; >>!OUT_PUT!
     echo        ssl_prefer_server_ciphers on; >>!OUT_PUT!
+    echo        client_max_body_size 10m; >>!OUT_PUT!
 
     echo        location \ { >>!OUT_PUT!
     echo            root   C:/nginx/html; >>!OUT_PUT!
@@ -233,11 +234,11 @@ if not exist "%NGINX_CONFD%\%WEBSITE%.location" (
     echo    } >>!OUT_PUT!
 )
 rem 重新创建根网站容器
-set LINK_TOMCATS=
+set LINK_CONTAINER=
 for /f "delims=" %%I in ('docker ps --format "table {{.Names}}"') do (
     set NAME=%%I
     if "!NAME:~0,12!" equ "ibas-tomcat-" (
-        set LINK_TOMCATS=!LINK_TOMCATS! --link !NAME!
+        set LINK_CONTAINER=!LINK_CONTAINER! --link !NAME!
     )
 )
 docker rm -vf %CONTAINER_NGINX%
@@ -248,7 +249,7 @@ docker run -d ^
     -m 64m ^
     -v "%NGINX_CONFD%:C:\nginx\conf.d" ^
     -v "%NGINX_CERT%:C:\nginx\cert" ^
-    %LINK_TOMCATS% ^
+    %LINK_CONTAINER% ^
     colorcoding/nginx:ibas-wincore
 echo --网站地址：http:\\%NGINX_NAME%:%NGINX_PORT_HTTP%\%WEBSITE%\
 echo --网站地址：https:\\%NGINX_NAME%:%NGINX_PORT_HTTPS%\%WEBSITE%\

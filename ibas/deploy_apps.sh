@@ -72,7 +72,7 @@ while read file; do
   folder=${folder%.service*}
   # 记录释放的目录到ibas.release.txt，此文件为部署顺序说明。
   if [ ! -e "${IBAS_DEPLOY}/ibas.release.txt" ]; then : >"${IBAS_DEPLOY}/ibas.release.txt"; fi
-  grep -q ${folder} "${IBAS_DEPLOY}/ibas.release.txt" || echo "${folder}" >>"${IBAS_DEPLOY}/ibas.release.txt"
+  grep -q -w "${folder}" "${IBAS_DEPLOY}/ibas.release.txt" || echo "${folder}" >>"${IBAS_DEPLOY}/ibas.release.txt"
   # 解压war包到目录
   unzip -o "${IBAS_PACKAGE}/${file}" -d "${IBAS_DEPLOY}/${folder}"
   # 存在WEB安全目录
