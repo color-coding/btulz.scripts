@@ -148,7 +148,6 @@ set NGINX_CONFD=%WORK_FOLDER%\root\conf.d
 set NGINX_CERT=%WORK_FOLDER%\root\cert
 set NGINX_NAME=%ComputerName%
 set NGINX_PORT_HTTP=
-set NGINX_PORT_HTTPS=
 
 echo --网站根节点：%CONTAINER_NGINX%
 set /p UPDATE_ROOT=----更新根节点？（n or [y]）:
@@ -162,10 +161,6 @@ rem 获取端口号
 set /p NGINX_PORT_HTTP=----根节点http端口（80）:
 if "%NGINX_PORT_HTTP%" equ "" (
     set NGINX_PORT_HTTP=80
-)
-set /p NGINX_PORT_HTTPS=----根节点https端口（443）:
-if "%NGINX_PORT_HTTPS%" equ "" (
-    set NGINX_PORT_HTTPS=443
 )
 rem 检查数据目录
 if not exist "%NGINX_CERT%" mkdir "%NGINX_CERT%"
@@ -187,31 +182,9 @@ if not exist "%NGINX_CONFD%\default.conf" (
     echo            root   C:/nginx/html; >>!OUT_PUT!
     echo        } >>!OUT_PUT!
 
-    echo        # others >>!OUT_PUT!
-    echo        include C:/nginx/conf.d/*.location; >>!OUT_PUT!
-    echo    } >>!OUT_PUT!
-
-    echo    server { >>!OUT_PUT!
-    echo        listen %NGINX_PORT_HTTPS%; >>!OUT_PUT!
-    echo        server_name %NGINX_NAME%; >>!OUT_PUT!
-    echo        ssl on; >>!OUT_PUT!
-    echo        ssl_certificate   C:/nginx/cert/1_%NGINX_NAME%_bundle.crt; >>!OUT_PUT!
-    echo        ssl_certificate_key  C:/nginx/cert/2_%NGINX_NAME%.key; >>!OUT_PUT!
-    echo        ssl_session_timeout 5m; >>!OUT_PUT!
-    echo        ssl_ciphers ECDHE-RSA-AES128-GCM-SHA256:ECDHE:ECDH:AES:HIGH:!NULL:!aNULL:!MD5:!ADH:!RC4; >>!OUT_PUT!
-    echo        ssl_protocols TLSv1 TLSv1.1 TLSv1.2; >>!OUT_PUT!
-    echo        ssl_prefer_server_ciphers on; >>!OUT_PUT!
-    echo        client_max_body_size 10m; >>!OUT_PUT!
-
-    echo        location \ { >>!OUT_PUT!
-    echo            root   C:/nginx/html; >>!OUT_PUT!
-    echo            index  index.html index.htm; >>!OUT_PUT!
-    echo        } >>!OUT_PUT!
-
-    echo        error_page   500 502 503 504  \50x.html; >>!OUT_PUT!
-    echo        location = \50x.html { >>!OUT_PUT!
-    echo            root   C:/nginx/html; >>!OUT_PUT!
-    echo        } >>!OUT_PUT!
+    echo        proxy_connect_timeout 1800; >>!OUT_PUT!
+    echo        proxy_send_timeout 1800; >>!OUT_PUT!
+    echo        proxy_read_timeout 1800; >>!OUT_PUT!
 
     echo        # others >>!OUT_PUT!
     echo        include C:/nginx/conf.d/*.location; >>!OUT_PUT!
@@ -221,10 +194,6 @@ if not exist "%NGINX_CONFD%\%WEBSITE%.location" (
     set OUT_PUT="%NGINX_CONFD%\%WEBSITE%.location"
     echo    # script created >!OUT_PUT!
     echo    location /%WEBSITE%/ { >>!OUT_PUT!
-    echo        proxy_connect_timeout 1800; >>!OUT_PUT!
-    echo        proxy_send_timeout 1800; >>!OUT_PUT!
-    echo        proxy_read_timeout 1800; >>!OUT_PUT!
-
     echo        proxy_pass http://%CONTAINER_TOMCAT%:8080/; >>!OUT_PUT!
     echo        proxy_redirect off; >>!OUT_PUT!
     echo        proxy_set_header Host $host; >>!OUT_PUT!
@@ -245,7 +214,6 @@ docker rm -vf %CONTAINER_NGINX%
 docker run -d ^
     --name %CONTAINER_NGINX% ^
     -p %NGINX_PORT_HTTP%:80 ^
-    -p %NGINX_PORT_HTTPS%:443 ^
     -m 64m ^
     -v "%NGINX_CONFD%:C:\nginx\conf.d" ^
     -v "%NGINX_CERT%:C:\nginx\cert" ^
