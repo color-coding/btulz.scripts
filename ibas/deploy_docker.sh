@@ -28,6 +28,15 @@ fi
 if [ ! -e ${WORK_FOLDER}/${WEBSITE} ]; then
     mkdir -p ${WORK_FOLDER}/${WEBSITE}
 fi
+# 检查容器网络
+DOCKER_NET=
+read -p "--检查并创建容器网络？（[ibas-net]）: " DOCKER_NET
+if [ "${DOCKER_NET}" = "" ]; then
+    DOCKER_NET=ibas-net
+fi
+if [ "$(docker network ls | grep "${DOCKER_NET}")" = "" ]; then
+    echo --容器网络：$(docker network create ${DOCKER_NET})
+fi
 # 启动容器控制台
 CONTAINER_PORTAINER=portainer
 if [ ! -e ${WORK_FOLDER}/${CONTAINER_PORTAINER} ]; then
@@ -46,8 +55,9 @@ if [ -e ${WORK_FOLDER}/${CONTAINER_PORTAINER} ]; then
     echo --容器管理平台：$(
         docker run -d \
             --name=${CONTAINER_PORTAINER} \
-            --restart=always \
             --privileged=true \
+            --restart=always \
+            --network=${DOCKER_NET} \
             -m 128m \
             -v /var/run/docker.sock:/var/run/docker.sock \
             -v ${WORK_FOLDER}/${CONTAINER_PORTAINER}:/data \
@@ -158,6 +168,7 @@ EOF
         docker run -d \
             --name ${CONTAINER_TOMCAT} \
             --privileged=true \
+            --network=${DOCKER_NET} \
             -m ${MEM_TOMCAT}m \
             -v ${WORK_FOLDER}/${WEBSITE}/ibas:/usr/local/tomcat/ibas \
             -v ${WORK_FOLDER}/${WEBSITE}/ibas_packages:/usr/local/tomcat/ibas_packages \
@@ -212,7 +223,8 @@ if [ -e ${WORK_FOLDER}/${CONTAINER_GOFILES} ]; then
             --name=${CONTAINER_GOFILES} \
             --privileged=true \
             --restart=always \
-            -m 256m \
+            --network=${DOCKER_NET} \
+            -m 128m \
             ${GOFILES_PORT} \
             ${LINK_FOLDER} \
             colorcoding/gofiles
@@ -230,12 +242,23 @@ NGINX_PORT_HTTP=
 NGINX_PORT_HTTPS=
 
 echo --网站根节点：${CONTAINER_NGINX}
-read -p "--更新根节点？（n or [y]）: " UPDATE_ROOT
+read -p "----更新根节点？（n or [y]）: " UPDATE_ROOT
 if [ "${UPDATE_ROOT}" = "n" ]; then
     exit 0
 fi
+if [ -e ${WORK_FOLDER}/root/WELCOME ]; then
+    INDEX_WELCOME=$(cat ${WORK_FOLDER}/root/WELCOME)
+fi
+if [ "${INDEX_WELCOME}" = "" ]; then
+    read -p "----索引页面标题？: " INDEX_WELCOME
+fi
+if [ "${INDEX_WELCOME}" = "" ]; then
+    INDEX_WELCOME="Welcome to ibas apps!"
+else
+    echo ${INDEX_WELCOME} >${WORK_FOLDER}/root/WELCOME
+fi
 # 创建http相关内容
-read -p "--根节点http端口（80）: " NGINX_PORT_HTTP
+read -p "----根节点http端口（80）: " NGINX_PORT_HTTP
 if [ "${NGINX_PORT_HTTP}" = "" ]; then
     NGINX_PORT_HTTP=80
 fi
@@ -271,7 +294,7 @@ server {
 }
 EOF
 fi
-read -p "--根节点https端口（443）: " NGINX_PORT_HTTPS
+read -p "----根节点https端口（443）: " NGINX_PORT_HTTPS
 if [ "${NGINX_PORT_HTTPS}" = "" ]; then
     NGINX_PORT_HTTPS=443
 fi
@@ -443,7 +466,7 @@ cat >${WORK_FOLDER}/root/index.html <<EOF
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Welcome to ibas apps!</title>
+    <title>${INDEX_WELCOME}</title>
     <style>
         body {
             width: 35em;
@@ -453,7 +476,7 @@ cat >${WORK_FOLDER}/root/index.html <<EOF
     </style>
 </head>
 <body>
-    <h1>Welcome to ibas apps!</h1>
+    <h1>${INDEX_WELCOME}</h1>
     ${LINK_APPS}
 </body>
 <script>
@@ -475,14 +498,14 @@ echo --根网站：$(
         --name ${CONTAINER_NGINX} \
         --privileged=true \
         --restart=always \
+        --network=${DOCKER_NET} \
         -m 32m \
         -p ${NGINX_PORT_HTTP}:80 \
         -p ${NGINX_PORT_HTTPS}:443 \
         -v ${NGINX_CONFD}:/etc/nginx/conf.d/ \
         -v ${NGINX_CERT}:/etc/nginx/cert/ \
         -v ${WORK_FOLDER}/root/index.html:/usr/share/nginx/html/index.html \
-        ${LINK_CONTAINER} \
         colorcoding/nginx:alpine
 )
-echo --网站地址：http://${NGINX_NAME}:${NGINX_PORT_HTTP}/${WEBSITE}/
-echo --网站地址：https://${NGINX_NAME}:${NGINX_PORT_HTTPS}/${WEBSITE}/
+echo ----网站地址：http://${NGINX_NAME}:${NGINX_PORT_HTTP}/${WEBSITE}/
+echo ----网站地址：https://${NGINX_NAME}:${NGINX_PORT_HTTPS}/${WEBSITE}/
