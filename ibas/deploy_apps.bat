@@ -14,9 +14,14 @@ echo     6. 脚本通文件链接方式，集中配置文件和日志目录到IBAS_HOME下。
 echo     7. 提前下载并配置7z到PATH变量，或拷贝到.\ibas_tools目录。
 echo     8. 请调整conf\catalina.properties的shared.loader="${catalina.home}/ibas_lib/*.jar"。
 echo **************************************************************************************
-SET h=%time:~0,2%
-SET hh=%h: =0%
-SET DATE_NAME=%date:~0,4%%date:~5,2%%date:~8,2%_%hh%%time:~3,2%%time:~6,2%
+REM 获取当前时间（兼容容器内）
+SET DATE_NAME=
+for /f "skip=1 delims=" %%a in ('wmic os get localdatetime /value') do (  
+    for /f "tokens=2 delims==" %%b in ("%%a") do (  
+        SET datetime=%%b  
+        SET DATE_NAME=!datetime:~0,4!!datetime:~4,2!!datetime:~6,2!_!datetime:~8,2!!datetime:~10,2!!datetime:~12,2!
+    )  
+)
 REM 设置参数变量
 SET WORK_FOLDER=%~dp0
 REM 设置ibas目录

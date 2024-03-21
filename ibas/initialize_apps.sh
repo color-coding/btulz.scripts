@@ -1,18 +1,24 @@
 #!/bin/sh
 echo '****************************************************************************'
-echo '     initialize_apps.sh                                                     '
-echo '            by niuren.zhu                                                   '
-echo '               2018.01.27                                                   '
-echo '  说明：                                                                    '
-echo '    1. 分析jar包创建数据结构和初始化数据，数据库信息取值app.xml。           '
-echo '    2. 参数1，待分析的目录，默认.\webapps。                                 '
-echo '    3. 参数2，共享库目录，默认.\ibas_lib。                                  '
-echo '    4. 提前下载btulz.transforms并放置.\ibas_tools\目录。                    '
-echo '    5. 提前配置app.xml的数据库信息。                                        '
-echo '    6. 注意维护ibas.release的顺序说明。                                     '
+echo '                 initialize_apps.sh                                         '
+echo '                      by niuren.zhu                                         '
+echo '                      2018.01.27                                           '
+echo '  说明：                                                                     '
+echo '    1. 分析jar包创建数据结构和初始化数据，需要在Tomcat目录。                      '
+echo '    2. 参数1，配置文件（app.xml）路径，默认WEB-INF\app.xml。                   '
+echo '    3. 提前下载btulz.transforms并放置.\ibas_tools\目录。                       '
+echo '    4. 注意维护ibas.release的顺序说明。                                        '
 echo '****************************************************************************'
 # 设置参数变量
 WORK_FOLDER=$PWD
+# 设置配置文件
+if [ "$1" != "" ]; then
+  if [ ! -e "$1" ]; then
+    echo not found config file, $1.
+    exit 1
+  fi
+  IBAS_APP=$1
+fi
 # 设置ibas_tools目录
 TOOLS_FOLDER=${WORK_FOLDER}/ibas_tools
 TOOLS_TRANSFORM=${TOOLS_FOLDER}/btulz.transforms.bobas-0.1.0.jar
@@ -20,16 +26,14 @@ if [ ! -e "${TOOLS_TRANSFORM}" ]; then
   echo not found btulz.transforms, in [${TOOLS_FOLDER}].
   exit 1
 fi
-# 设置DEPLOY目录
-IBAS_DEPLOY=$1
-if [ "${IBAS_DEPLOY}" = "" ]; then IBAS_DEPLOY=${WORK_FOLDER}/webapps; fi
+# 设置webapps目录
+IBAS_DEPLOY=${WORK_FOLDER}/webapps
 if [ ! -e "${IBAS_DEPLOY}" ]; then
   echo not found webapps.
   exit 1
 fi
-# 设置LIB目录
-IBAS_LIB=$2
-if [ "${IBAS_LIB}" = "" ]; then IBAS_LIB=${WORK_FOLDER}/ibas_lib; fi
+# 设置lib目录
+IBAS_LIB=${WORK_FOLDER}/ibas_lib
 
 # 开始时间
 START_TIME=$(date +'%Y-%m-%d %H:%M:%S')
@@ -39,6 +43,9 @@ echo 开始时间：${START_TIME}
 echo 工具地址：${TOOLS_TRANSFORM}
 echo 部署目录：${IBAS_DEPLOY}
 echo 共享目录：${IBAS_LIB}
+if [ -e "${IBAS_APP}" ]; then
+  echo 配置文件：${IBAS_APP}
+fi
 echo ----------------------------------------------------
 
 echo 开始分析${IBAS_DEPLOY}目录下数据
@@ -49,8 +56,11 @@ if [ ! -e "${IBAS_DEPLOY}/ibas.release.txt" ]; then
 fi
 while read folder; do
   echo --${folder}
-  # 判断配置文件是否存在
-  FILE_APP=${IBAS_DEPLOY}/${folder}/WEB-INF/app.xml
+  # 设置配置文件，优先使用传入参数
+  FILE_APP=${IBAS_APP}
+  if [ ! -e "${FILE_APP}" ]; then
+    FILE_APP=${IBAS_DEPLOY}/${folder}/WEB-INF/app.xml
+  fi
   if [ -e "${FILE_APP}" ]; then
     # 使用模块目录jar包
     if [ -e "${IBAS_DEPLOY}/${folder}/WEB-INF/lib" ]; then
