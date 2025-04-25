@@ -13,8 +13,8 @@ echo     5. 此脚本会遍历当前目录的子目录，查找pom.xml并编译jar包到release目录。
 echo     6. 可在compile_order.txt文件中调整编译顺序。
 echo     7. 需要安装7zip并添加到PATH。
 echo ****************************************************************************
-REM 设置参数变量
-SET WORK_FOLDER=%~dp0
+rem 设置参数变量
+set WORK_FOLDER=%~dp0
 
 echo --当前工作的目录是[%WORK_FOLDER%]
 
