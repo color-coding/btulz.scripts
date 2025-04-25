@@ -13,24 +13,28 @@ echo             ^<username^>用户名^<^/username^>
 echo             ^<password^>密码^<^/password^>
 echo           ^<^/server^>
 echo ****************************************************************************
-REM 设置参数变量
-SET WORK_FOLDER=%~dp0
-REM 仓库根地址
-SET ROOT_URL=http://maven.colorcoding.org/repository/
-REM 仓库名称
-SET REPOSITORY=%1
-REM 设置默认仓库名称
-if "%REPOSITORY%"=="" SET REPOSITORY=maven-releases
+rem 设置参数变量
+set WORK_FOLDER=%~dp0
+rem 仓库根地址
+set ROOT_URL=http://maven.colorcoding.org/repository/
+rem 仓库名称
+set REPOSITORY=%1
+rem 设置默认仓库名称
+if "%REPOSITORY%"=="" set REPOSITORY=maven-releases
 set REPOSITORY_URL=%ROOT_URL%%REPOSITORY%
 set REPOSITORY_ID=ibas-maven
 
 echo --检查maven运行环境
-call mvn -v >nul || goto :CHECK_MAVEN_FAILD
+set MVN_BIN=mvn
+if "%MAVEN_HOME%" neq "" (
+  set MVN_BIN="%MAVEN_HOME%"\bin\mvn
+)
+call %MVN_BIN% -v >nul || goto :CHECK_MAVEN_FAILD
 
 echo --发布地址：%REPOSITORY_URL%
-REM 发布工具包集合
+rem 发布工具包集合
 if exist %WORK_FOLDER%\release\btulz.scripts.tar (
-  call mvn deploy:deploy-file ^
+  call %MVN_BIN% deploy:deploy-file ^
     -DgroupId=org.colorcoding.tools ^
     -DartifactId=btulz.scripts ^
     -Durl=%REPOSITORY_URL% ^
@@ -42,7 +46,7 @@ if exist %WORK_FOLDER%\release\btulz.scripts.tar (
 echo --操作完成
 
 goto :EOF
-REM ********************************以下为函数************************************
+rem ********************************以下为函数************************************
 :CHECK_MAVEN_FAILD
 echo 没有检测到MAVEN，请按照以下步骤检查
 echo 1. 是否安装，下载地址：http://maven.apache.org/download.cgi
