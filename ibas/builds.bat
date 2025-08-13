@@ -6,7 +6,9 @@ echo                     by niuren.zhu
 echo                           2017.06.01
 echo  说明：
 echo     1. 遍历工作目录，存在build_all.bat则调用。
-echo     2. 参数1，工作目录。
+echo     2. 使用uglifyjs压缩*.js文件为*.min.js。
+echo     3. 参数1，工作目录。
+echo     4. 环境变量[TS_COMPRESS_NO_ORIGINAL=true]，则不保留原始文件。
 echo ****************************************************************************
 rem 设置参数变量
 rem 启动目录
@@ -57,6 +59,9 @@ rem 遍历当前目录
         set COMPRESSED=!FILE:~0,-3!.min.js
         echo --开始压缩：!FILE!
         call uglifyjs --compress --safari10 --keep-classnames --keep-fnames --mangle --output !COMPRESSED! !FILE!
+        if "!TS_COMPRESS_NO_ORIGINA!"=="true" (
+          copy /y !COMPRESSED! !FILE!
+        )
       )
     )
   )
