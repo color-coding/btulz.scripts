@@ -10,7 +10,7 @@ echo '    3. 参数2，输出文件地址，默认：./ibas/conf/service_routing
 echo '    4. 参数3，数据服务地址模板，默认：${ModuleName}/services/rest/data/。         '
 echo '    5. 参数4，视图服务地址模板，默认：.../${ModuleName}/。                        '
 echo '    6. 参数5，共享库目录，默认./ibas_lib。                                       '
-echo '    7. 提前下载btulz.transforms并放置.\ibas_tools\目录。                        '
+echo '    7. 提前下载btulz.transforms并放置./ibas_tools/目录。                        '
 echo '    8. 提前配置app.xml的数据库信息。                                            '
 echo '****************************************************************************'
 # 设置参数变量
@@ -21,6 +21,11 @@ TOOLS_TRANSFORM=${TOOLS_FOLDER}/btulz.transforms.bobas-0.1.0.jar
 if [ ! -e "${TOOLS_TRANSFORM}" ]; then
   echo not found btulz.transforms, in [${TOOLS_FOLDER}].
   exit 1
+fi
+# 设置java路径
+if [ -e "${WORK_FOLDER}/jdk/bin" ]; then
+  JAVA_HOME=${WORK_FOLDER}/jdk
+  PATH=${JAVA_HOME}/bin:${PATH}
 fi
 # 设置配置文件
 CONF_APP=$1
