@@ -5,8 +5,9 @@ echo '                      by niuren.zhu                                       
 echo '                           2017.06.01                                       '
 echo '  说明：                                                                     '
 echo '    1. 遍历工作目录，存在build_all.bat则调用。                                  '
-echo '    2. 使用uglifyjs压缩*.js文件为*.min.js。                                   '
-echo '    3. 参数1，编译的模块名称，不提供时使用compile_order.txt文件。                 '
+echo '    2. 使用uglifyjs压缩*.js文件为*.min.js。                                    '
+echo '    3. 参数1，编译的模块名称，不提供时使用compile_order.txt文件。                  '
+echo '    4. 环境变量[TS_COMPRESS_NO_ORIGINAL=true]，则不保留原始文件。                  '
 echo '****************************************************************************'
 # 设置参数变量
 # 工作目录
@@ -53,6 +54,9 @@ for folder in ${COMPILE_ORDER}; do
       compressed=${file%.js*}.min.js
       echo --开始压缩：${file}
       uglifyjs --compress --safari10 --keep-classnames --keep-fnames --mangle --output ${compressed} ${file}
+      if [ "${TS_COMPRESS_NO_ORIGINAL}" = "true" ];then
+          cp -f ${compressed} ${file}
+      fi
     done
   fi
   echo '****************************************************************************'
