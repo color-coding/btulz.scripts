@@ -30,6 +30,11 @@ if not exist "%TOOLS_TRANSFORM%" (
   echo not found btulz.transforms.bobas.
   goto :EOF
 )
+rem 设置java路径
+if exist "%WORK_FOLDER%\jdk\bin\" (
+  set "JAVA_HOME=%WORK_FOLDER%\jdk\"
+  set "PATH=!JAVA_HOME!bin;%PATH%"
+)
 rem 设置DEPLOY目录
 set IBAS_DEPLOY=%WORK_FOLDER%\webapps\
 if not exist "%IBAS_DEPLOY%" (

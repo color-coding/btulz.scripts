@@ -5,8 +5,10 @@ echo '                      by niuren.zhu                                       
 echo '                           2017.06.01                                       '
 echo '  说明：                                                                     '
 echo '    1. 遍历工作目录，存在build_all.bat则调用。                                  '
-echo '    2. 使用uglifyjs压缩*.js文件为*.min.js。                                   '
-echo '    3. 参数1，编译的模块名称，不提供时使用compile_order.txt文件。                 '
+echo '    2. 使用uglifyjs压缩*.js文件为*.min.js。                                    '
+echo '    3. 参数1，编译的模块名称，不提供时使用compile_order.txt文件。                  '
+echo '    4. 环境变量[TS_COMPRESS_DISABLED=true]，则不开启文件压缩。                   '
+echo '    5. 环境变量[TS_COMPRESS_NO_ORIGINAL=true]，则不保留原始文件。                '
 echo '****************************************************************************'
 # 设置参数变量
 # 工作目录
@@ -18,14 +20,15 @@ echo --工作目录：${WORK_FOLDER}
 
 echo --检查工具
 COMPRESS=false
-uglifyjs -V
-if [ "$?" = "0" ]; then
-  COMPRESS=true
-else
-  echo 请先安装压缩工具[npm install uglify-es -g]
-  exit 1
+if [ "${TS_COMPRESS_DISABLED}" != "true" ]; then
+  uglifyjs -V
+  if [ "$?" = "0" ]; then
+    COMPRESS=true
+  else
+    echo 请先安装压缩工具[npm install uglify-es -g]
+    exit 1
+  fi
 fi
-
 # 获取编译内容
 COMPILE_ORDER=$@
 if [ "${COMPILE_ORDER}" = "" ]; then
@@ -53,6 +56,9 @@ for folder in ${COMPILE_ORDER}; do
       compressed=${file%.js*}.min.js
       echo --开始压缩：${file}
       uglifyjs --compress --safari10 --keep-classnames --keep-fnames --mangle --output ${compressed} ${file}
+      if [ "${TS_COMPRESS_NO_ORIGINAL}" = "true" ];then
+          cp -f ${compressed} ${file}
+      fi
     done
   fi
   echo '****************************************************************************'
