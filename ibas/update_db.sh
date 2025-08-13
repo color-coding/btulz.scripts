@@ -19,6 +19,11 @@ if [ ! -e "${TOOLS_TRANSFORM}" ]; then
   echo not found btulz.transforms, in [${TOOLS_FOLDER}].
   exit 1
 fi
+# 设置java路径
+if [ -e "${WORK_FOLDER}/jdk/bin" ]; then
+  JAVA_HOME=${WORK_FOLDER}/jdk
+  PATH=${JAVA_HOME}/bin:${PATH}
+fi
 # 设置数据文件
 DS_FILE=$1
 if [ "${DS_FILE}" = "" ]; then

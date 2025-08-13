@@ -67,6 +67,8 @@ echo ----------------------------------------------------
 echo 开始解压[%IBAS_PACKAGE%]的war包
 REM 开始发布当前版本
 if not exist "%IBAS_PACKAGE%ibas.deploy.order.txt" dir /b /od "%IBAS_PACKAGE%ibas.*.war" >"%IBAS_PACKAGE%ibas.deploy.order.txt"
+if not exist "%IBAS_DEPLOY%ibas.release.txt" type nul >"%IBAS_DEPLOY%ibas.release.txt"
+
 for /f %%m in (%IBAS_PACKAGE%ibas.deploy.order.txt) DO (
     echo --开始处理[%%m]
     SET module=%%m
@@ -76,7 +78,10 @@ REM 获取文件名字第二个.的位置，ibas.NAME.service-.....war
 	call :GetChar !module! 5 !pos! name
     if !pos! GTR 0 (
         if exist "%IBAS_PACKAGE%%%m" (
-            echo !name!>>"%IBAS_DEPLOY%ibas.release.txt"
+            findstr /i "!name!" "!IBAS_DEPLOY!ibas.release.txt" >nul
+            if !errorlevel! neq 0 (
+                echo !name!>>"!IBAS_DEPLOY!ibas.release.txt"
+            )
             %TOOL_7Z% x "%IBAS_PACKAGE%%%m" -r -y -o"%IBAS_DEPLOY%!name!"
 REM 存在WEB安全目录
             if exist "%IBAS_DEPLOY%!name!\WEB-INF\" (
