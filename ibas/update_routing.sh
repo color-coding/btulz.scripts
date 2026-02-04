@@ -17,7 +17,7 @@ echo '**************************************************************************
 WORK_FOLDER=$PWD
 # 设置ibas_tools目录
 TOOLS_FOLDER=${WORK_FOLDER}/ibas_tools
-TOOLS_TRANSFORM=${TOOLS_FOLDER}/btulz.transforms.bobas-0.1.0.jar
+TOOLS_TRANSFORM=${TOOLS_FOLDER}/$(ls -r ${TOOLS_FOLDER} | grep 'btulz.transforms.bobas-' | grep -v 'source' | head -n1)
 if [ ! -e "${TOOLS_TRANSFORM}" ]; then
   echo not found btulz.transforms, in [${TOOLS_FOLDER}].
   exit 1
