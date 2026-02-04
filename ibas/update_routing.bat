@@ -17,8 +17,11 @@ echo *****************************************************************
 rem 设置参数变量
 set "WORK_FOLDER=%CD%"
 rem 设置ibas_tools目录
-set "TOOLS_FOLDER=%WORK_FOLDER%\ibas_tools"
-set "TOOLS_TRANSFORM=%TOOLS_FOLDER%\btulz.transforms.bobas-0.1.0.jar"
+set TOOLS_FOLDER=%WORK_FOLDER%\ibas_tools\
+set TOOLS_TRANSFORM=
+for /f "delims=" %%i in ('dir /b "%TOOLS_FOLDER%btulz.transforms.bobas-*.jar"') do (
+  set TOOLS_TRANSFORM=%TOOLS_FOLDER%%%i
+)
 if not exist "%TOOLS_TRANSFORM%" (
   echo not found btulz.transforms, in [%TOOLS_FOLDER%].
   exit /b 1

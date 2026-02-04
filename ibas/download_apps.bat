@@ -38,10 +38,10 @@ if not exist "%TOOL_CURL%" SET TOOL_CURL=curl.exe
 
 REM 显示参数信息
 echo ----------------------------------------------------
-echo --工作的目录：%WORK_FOLDER%
-echo --程序的目录：%PACKAGES_FOLDER%
-echo --应用的列表：%PACKAGES_LIST%
-echo --应用的版本：%APP_VERSION%
+echo --工作目录：%WORK_FOLDER%
+echo --应用目录：%PACKAGES_FOLDER%
+echo --应用列表：%PACKAGES_LIST%
+echo --应用版本：%APP_VERSION%
 echo ----------------------------------------------------
 
 if not exist "%PACKAGES_LIST%" (
@@ -50,14 +50,20 @@ if not exist "%PACKAGES_LIST%" (
 )
 
 REM 下载列表文件
+cd "%PACKAGES_FOLDER%"
 for /f %%l in (%PACKAGES_LIST%) do (
   set PACKAGE_URL=%%l
   if "!PACKAGE_URL:~0,4!" equ "http" (
     echo ---正在下载：!PACKAGE_URL!
-    cd "!PACKAGES_FOLDER!" && "!TOOL_CURL!"  --retry 3 -L -O "!PACKAGE_URL!"
+    for %%a in (echo "!PACKAGE_URL:/=" "!") do (
+      set FILE_NAME=%%~a
+    )
+    "!TOOL_CURL!" --retry 3 -L -O "!PACKAGE_URL!" && echo !FILE_NAME!>>ibas.deploy.order.txt
   )
 )
 cd "%WORK_FOLDER%"
-echo --程序清单：
-dir "%PACKAGES_FOLDER%"\*.war
+if exist "%PACKAGES_FOLDER%\ibas.deploy.order.txt" (
+  echo --应用清单：
+  type "%PACKAGES_FOLDER%\ibas.deploy.order.txt"
+}
 echo 操作完成
