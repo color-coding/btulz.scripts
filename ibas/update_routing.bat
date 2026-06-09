@@ -8,7 +8,7 @@ echo  说明：
 echo    1. 分析数据库更新[service_routing.xml]。       
 echo    2. 参数1，配置文件地址，默认：./ibas/conf/app.xml。       
 echo    3. 参数2，输出文件地址，默认：./ibas/conf/service_routing.xml。    
-echo    4. 参数3，数据服务地址模板，默认：${ModuleName}/services/rest/data/。
+echo    4. 参数3，数据服务地址模板，默认：.../${ModuleName}/services/rest/data/。
 echo    5. 参数4，视图服务地址模板，默认：.../${ModuleName}/。     
 echo    6. 参数5，共享库目录，默认./ibas_lib。  
 echo    7. 提前下载btulz.transforms并放置./ibas_tools/目录。     

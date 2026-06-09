@@ -37,9 +37,9 @@ chooseFile() {
   done
   echo --检索到[${#FILES[@]}]个文件：
   for INDEX in "${!FILES[@]}"; do
-    printf "  %s) %s\n" "$(expr $INDEX + 1)" "${FILES[$INDEX]}"
+    printf "  %s) %s\n" "$(expr $INDEX + 1)" "$(basename "${FILES[$INDEX]}")"
   done
-  printf "  %s) %s\n" "0" "${FILE_FOLDER}/~last.${FILE_TYPE}"
+  printf "  %s) %s\n" "0" "~last.${FILE_TYPE}"
   read -p "--请输入选择的文件序号: " INDEX
   if [ "${INDEX}" = "" ]; then
     CHS_FILE=

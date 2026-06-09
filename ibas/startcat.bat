@@ -4,47 +4,47 @@ echo ***************************************************************************
 echo                    startcat.bat
 echo                          by niuren.zhu
 echo                          2021.01.14
-echo          ËµÃ÷£º
-echo              1. ÁÐÊ¾²¢Ñ¡ÔñÅäÖÃÎÄ¼þ¡£
-echo              2. Æô¶¯Tomcat¡£
+echo          Ëµï¿½ï¿½ï¿½ï¿½
+echo              1. ï¿½ï¿½Ê¾ï¿½ï¿½Ñ¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¼ï¿½ï¿½ï¿½
+echo              2. ï¿½ï¿½ï¿½ï¿½Tomcatï¿½ï¿½
 echo **************************************************************************************
-rem ÉèÖÃ²ÎÊý±äÁ¿
+rem ï¿½ï¿½ï¿½Ã²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 set WORK_FOLDER=%~dp0
 
 set CONFIG_FOLDER=%WORK_FOLDER%\ibas\conf
 set TOMCAT=%WORK_FOLDER%\bin\startup.bat
 
-rem ¼ì²é»·¾³
+rem ï¿½ï¿½é»·ï¿½ï¿½
 if not exist "%CONFIG_FOLDER%" (
-    echo --Ã»ÓÐÅäÖÃÎÄ¼þ¼Ð
+    echo --Ã»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¼ï¿½ï¿½ï¿½
     goto :EOF
 )
 if not exist "%TOMCAT%" (
-    echo --Ã»ÓÐTOMCATÆô¶¯½Å±¾
+    echo --Ã»ï¿½ï¿½TOMCATï¿½ï¿½ï¿½ï¿½ï¿½Å±ï¿½
     goto :EOF
 )
 
-rem Ñ¡ÔñÎÄ¼þ
-echo --ºó¶ËÅäÖÃÎÄ¼þÑ¡Ôñ
+rem Ñ¡ï¿½ï¿½ï¿½Ä¼ï¿½
+echo --ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¼ï¿½Ñ¡ï¿½ï¿½
 call :CHOOSE_FILE %CONFIG_FOLDER% app.xml
 echo.
 
-echo --·þÎñÂ·ÓÉÎÄ¼þÑ¡Ôñ
+echo --ï¿½ï¿½ï¿½ï¿½Â·ï¿½ï¿½ï¿½Ä¼ï¿½Ñ¡ï¿½ï¿½
 call :CHOOSE_FILE %CONFIG_FOLDER% service_routing.xml
 echo.
 
-echo --Ç°¶ËÅäÖÃÎÄ¼þÑ¡Ôñ
+echo --Ç°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¼ï¿½Ñ¡ï¿½ï¿½
 call :CHOOSE_FILE %CONFIG_FOLDER% config.json
 echo.
 
-echo --Æô¶¯Tomcat
+echo --ï¿½ï¿½ï¿½ï¿½Tomcat
 call "%TOMCAT%"
 
 goto :EOF
 
-rem º¯Êý£ºÁÐÊ¾²¢Ñ¡ÔñÎÄ¼þ¡£
-rem     ²ÎÊý1£¬ÎÄ¼þÄ¿Â¼
-rem     ²ÎÊý2£¬ÎÄ¼þÀàÐÍ
+rem ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾ï¿½ï¿½Ñ¡ï¿½ï¿½ï¿½Ä¼ï¿½ï¿½ï¿½
+rem     ï¿½ï¿½ï¿½ï¿½1ï¿½ï¿½ï¿½Ä¼ï¿½Ä¿Â¼
+rem     ï¿½ï¿½ï¿½ï¿½2ï¿½ï¿½ï¿½Ä¼ï¿½ï¿½ï¿½ï¿½ï¿½
 :CHOOSE_FILE
     set FILE_FOLDER=%1
     set FILE_TYPE=%2
@@ -61,21 +61,21 @@ rem     ²ÎÊý2£¬ÎÄ¼þÀàÐÍ
     set INDEX=0
     for %%f in ("%FILE_FOLDER%\%FILE_FILTER%") DO (
         set /a INDEX=!INDEX! + 1
-        echo "!INDEX!) %%~ff"
+        echo "!INDEX!) %%~nxf"
         set FILE_NAMES[!INDEX!]=%%~ff
     )
-    if exist "%FILE_FOLDER%~last.%FILE_TYPE%" echo "0) %FILE_FOLDER%~last.%FILE_TYPE%"
+    if exist "%FILE_FOLDER%\~last.%FILE_TYPE%" echo "0) ~last.%FILE_TYPE%"
 
-    set /p CHOOSE=--ÇëÊäÈëÑ¡ÔñµÄÎÄ¼þÐòºÅ:
+    set /p CHOOSE=--ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½ï¿½ï¿½Ä¼ï¿½ï¿½ï¿½ï¿½:
     if "%CHOOSE%" equ "" goto :END_FUNC
 
     if "%CHOOSE%" equ "0" (
-        copy /y "%FILE_FOLDER%\~last.%FILE_TYPE%" "%FILE_FOLDER%\%FILE_TYPE%" >>nil
+        copy /y "%FILE_FOLDER%\~last.%FILE_TYPE%" "%FILE_FOLDER%\%FILE_TYPE%" >>nul
         goto :END_FUNC
     )
-    echo --Ê¹ÓÃÎÄ¼þ£º!FILE_NAMES[%CHOOSE%]!
-    copy /y "%FILE_FOLDER%\%FILE_TYPE%" "%FILE_FOLDER%\~last.%FILE_TYPE%" >>nil
-    copy /y "!FILE_NAMES[%CHOOSE%]!" "%FILE_FOLDER%\%FILE_TYPE%" >>nil
+    echo --Ê¹ï¿½ï¿½ï¿½Ä¼ï¿½ï¿½ï¿½!FILE_NAMES[%CHOOSE%]!
+    copy /y "%FILE_FOLDER%\%FILE_TYPE%" "%FILE_FOLDER%\~last.%FILE_TYPE%" >>nul
+    copy /y "!FILE_NAMES[%CHOOSE%]!" "%FILE_FOLDER%\%FILE_TYPE%" >>nul
 
 :END_FUNC
     for /L %%i in (1, 1, %INDEX%) DO (

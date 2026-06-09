@@ -16,7 +16,7 @@ echo ***************************************************************************
 rem 设置参数变量
 set WORK_FOLDER=%~dp0
 rem 仓库根地址
-set ROOT_URL=http://maven.colorcoding.org/repository/
+set ROOT_URL=https://maven.colorcoding.org/repository/
 rem 仓库名称
 set REPOSITORY=%1
 rem 设置默认仓库名称

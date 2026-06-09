@@ -1,20 +1,20 @@
 @echo off
 setlocal EnableDelayedExpansion
 echo *************************************************************************************
-echo '                  deploy_docker.bat
-echo '                     by niuren.zhu
-echo '                        2021.08.28
-echo '  说明：
-echo '    1. 参数1，文件夹为网站目录。并构建运行容器。
-echo '    2. 运行前，自主把应用war包，拷贝至网站目录下的ibas_packages下。
-echo '    3. 应用配置及数据文件，在网站目录的ibas目录。
-echo '    4. 脚本会自动在root\conf.d，创建网站的nginx配置。
-echo '    5. 若开启Tomcat远程诊断，可以用jconsole连接，注意端口冲突。
-echo '    6. 网站目录host文件会自动添加到容器（貌似windows不支持）。
+echo                   deploy_docker.bat
+echo                      by niuren.zhu
+echo                         2021.08.28
+echo   说明：
+echo     1. 参数1，文件夹为网站目录。并构建运行容器。
+echo     2. 运行前，自主把应用war包，拷贝至网站目录下的ibas_packages下。
+echo     3. 应用配置及数据文件，在网站目录的ibas目录。
+echo     4. 脚本会自动在root\conf.d，创建网站的nginx配置。
+echo     5. 若开启Tomcat远程诊断，可以用jconsole连接，注意端口冲突。
+echo     6. 网站目录host文件会自动添加到容器（貌似windows不支持）。
 echo **************************************************************************************
 rem 设置参数变量
 set WORK_FOLDER=%~dp0
-if "%WORK_FOLDER:~-1%" equ "\" SET WORK_FOLDER=%WORK_FOLDER:~0,-1%
+if "%WORK_FOLDER:~-1%" equ "\" set WORK_FOLDER=%WORK_FOLDER:~0,-1%
 
 echo --工作目录：%WORK_FOLDER%
 rem 获取网站名称
@@ -48,18 +48,18 @@ if "%RESET_TOMCAT%" equ "y" (
         if "!JMX_PORT!" equ "" (
             set JMX_PORT=8900
         )
-        REM 检查环境变量文件
+        rem 检查环境变量文件
         if exist "%WORK_FOLDER%\%WEBSITE%\tomcat_setenv.bat" (
             del /f "%WORK_FOLDER%\%WEBSITE%\tomcat_setenv.bat"
         )
         set OUT_PUT="%WORK_FOLDER%\%WEBSITE%\tomcat_setenv.bat"
-        echo REM script created >!OUT_PUT!
-        echo SET JAVA_OPTS="%%JAVA_OPTS%% -Dcom.sun.management.jmxremote" >>!OUT_PUT!
-        echo SET JAVA_OPTS="%%JAVA_OPTS%% -Dcom.sun.management.jmxremote.authenticate=false" >>!OUT_PUT!
-        echo SET JAVA_OPTS="%%JAVA_OPTS%% -Dcom.sun.management.jmxremote.ssl=false" >>!OUT_PUT!
-        echo SET JAVA_OPTS="%%JAVA_OPTS%% -Dcom.sun.management.jmxremote.port=!JMX_PORT!" >>!OUT_PUT!
-        echo SET JAVA_OPTS="%%JAVA_OPTS%% -Dcom.sun.management.jmxremote.rmi.port=!JMX_PORT!" >>!OUT_PUT!
-        echo SET JAVA_OPTS="%%JAVA_OPTS%% -Djava.rmi.server.hostname=%ComputerName%" >>!OUT_PUT!
+        echo rem script created >!OUT_PUT!
+        echo set JAVA_OPTS="%%JAVA_OPTS%% -Dcom.sun.management.jmxremote" >>!OUT_PUT!
+        echo set JAVA_OPTS="%%JAVA_OPTS%% -Dcom.sun.management.jmxremote.authenticate=false" >>!OUT_PUT!
+        echo set JAVA_OPTS="%%JAVA_OPTS%% -Dcom.sun.management.jmxremote.ssl=false" >>!OUT_PUT!
+        echo set JAVA_OPTS="%%JAVA_OPTS%% -Dcom.sun.management.jmxremote.port=!JMX_PORT!" >>!OUT_PUT!
+        echo set JAVA_OPTS="%%JAVA_OPTS%% -Dcom.sun.management.jmxremote.rmi.port=!JMX_PORT!" >>!OUT_PUT!
+        echo set JAVA_OPTS="%%JAVA_OPTS%% -Djava.rmi.server.hostname=%ComputerName%" >>!OUT_PUT!
 
         set DOCKER_JMX=-v "%WORK_FOLDER%\%WEBSITE%\tomcat_setenv.bat:C:\apache-tomcat\bin\setenv.bat"
         set DOCKER_JMX=!DOCKER_JMX! -p !JMX_PORT!:!JMX_PORT!
@@ -70,7 +70,7 @@ if "%RESET_TOMCAT%" equ "y" (
     )
     set /a MEM_JAVA=!MEM_TOMCAT! - 128
     if exist "%WORK_FOLDER%\%WEBSITE%\hosts" (
-REM 貌似windows版不支持
+rem 貌似windows版不支持
         set /p USE_HOSTS=----检测到host文件是否使用？（[n] or y）:
         if "!USE_HOSTS!" equ "y" (
             for /f "delims=" %%m in (%WORK_FOLDER%\%WEBSITE%\hosts) DO (
@@ -225,10 +225,10 @@ echo --网站地址：https:\\%NGINX_NAME%:%NGINX_PORT_HTTPS%\%WEBSITE%\
 goto :eof
 
 :DOWNCASE
-SET "DOWN=a b c d e f g h i j k l m n o p q r s t u v w x y z"
+set "DOWN=a b c d e f g h i j k l m n o p q r s t u v w x y z"
 SETLOCAL ENABLEDELAYEDEXPANSION
-SET $=&SET "#=%~1"
+set $=&set "#=%~1"
 IF DEFINED # (
-  FOR %%A IN (%DOWN%) DO SET #=!#:%%A=%%A!
+  FOR %%A IN (%DOWN%) DO set #=!#:%%A=%%A!
 )
-ENDLOCAL & SET "%~2=%#%" & goto :eof
+ENDLOCAL & set "%~2=%#%" & goto :eof

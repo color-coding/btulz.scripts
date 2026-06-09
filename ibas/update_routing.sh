@@ -7,7 +7,7 @@ echo '  说明：                                                               
 echo '    1. 分析数据库更新[service_routing.xml]。                                   '
 echo '    2. 参数1，配置文件地址，默认：./ibas/conf/app.xml。                          '
 echo '    3. 参数2，输出文件地址，默认：./ibas/conf/service_routing.xml。              '
-echo '    4. 参数3，数据服务地址模板，默认：${ModuleName}/services/rest/data/。         '
+echo '    4. 参数3，数据服务地址模板，默认：.../${ModuleName}/services/rest/data/。     '
 echo '    5. 参数4，视图服务地址模板，默认：.../${ModuleName}/。                        '
 echo '    6. 参数5，共享库目录，默认./ibas_lib。                                       '
 echo '    7. 提前下载btulz.transforms并放置./ibas_tools/目录。                        '
@@ -17,7 +17,7 @@ echo '**************************************************************************
 WORK_FOLDER=$PWD
 # 设置ibas_tools目录
 TOOLS_FOLDER=${WORK_FOLDER}/ibas_tools
-TOOLS_TRANSFORM=${TOOLS_FOLDER}/$(ls -r ${TOOLS_FOLDER} | grep 'btulz.transforms.bobas-' | grep -v 'source' | head -n1)
+TOOLS_TRANSFORM=${TOOLS_FOLDER}/$(ls -r "${TOOLS_FOLDER}" | grep 'btulz.transforms.bobas-' | grep -v 'source' | head -n1)
 if [ ! -e "${TOOLS_TRANSFORM}" ]; then
   echo not found btulz.transforms, in [${TOOLS_FOLDER}].
   exit 1

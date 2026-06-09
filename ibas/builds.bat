@@ -47,7 +47,7 @@ for /f %%l in (%WORK_FOLDER%compile_order.txt) do (
 rem 尝试压缩js文件
   if "%COMPRESS%"=="true" (
 rem 遍历当前目录
-    for /f %%n in ('dir /s /b %WORK_FOLDER%!FOLDER!\*.js ^| findstr /v /i "\\openui5\\" ^| findstr /v /i "\\3rdparty\\" ^| findstr /v /i "\\test\\apps\\"') DO (
+    for /f %%n in ('dir /s /b "%WORK_FOLDER%!FOLDER!\*.js" ^| findstr /v /i "\\openui5\\" ^| findstr /v /i "\\3rdparty\\" ^| findstr /v /i "\\test\\apps\\"') DO (
       set FILE=%%n
       set DONE=true
       set TMP_VALUE=!FILE!
@@ -61,9 +61,9 @@ rem 遍历当前目录
       if "!DONE!"=="true" (
         set COMPRESSED=!FILE:~0,-3!.min.js
         echo --开始压缩：!FILE!
-        call uglifyjs --compress --safari10 --keep-classnames --keep-fnames --mangle --output !COMPRESSED! !FILE!
-        if "!TS_COMPRESS_NO_ORIGINA!"=="true" (
-          copy /y !COMPRESSED! !FILE!
+        call uglifyjs --compress --safari10 --keep-classnames --keep-fnames --mangle --output "!COMPRESSED!" "!FILE!"
+        if "!TS_COMPRESS_NO_ORIGINAL!"=="true" (
+          copy /y "!COMPRESSED!" "!FILE!"
         )
       )
     )

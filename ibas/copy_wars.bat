@@ -11,7 +11,7 @@ echo ***************************************************************************
 rem 设置参数变量
 set STARTUP_FOLDER=%~dp0
 set PACKAGES_FOLDER=%STARTUP_FOLDER%ibas_packages\
-set WORK_FOLDER=%1
+set WORK_FOLDER=%~1
 
 if "%WORK_FOLDER:~-1%" neq "\" set WORK_FOLDER=%WORK_FOLDER%\
 if not exist "%PACKAGES_FOLDER%" mkdir "%PACKAGES_FOLDER%"
@@ -30,7 +30,7 @@ for /f %%l in (%WORK_FOLDER%compile_order.txt) do (
   set FOLDER=%WORK_FOLDER%%%l\release\
   if exist "!FOLDER!*.service-*.war" (
     copy /y "!FOLDER!*.service-*.war" "%PACKAGES_FOLDER%"
-    dir /b !FOLDER!*.service-*.war >>"%PACKAGES_FOLDER%ibas.deploy.order.txt"
+    dir /b "!FOLDER!*.service-*.war" >>"%PACKAGES_FOLDER%ibas.deploy.order.txt"
   )
 )
 echo --程序清单：

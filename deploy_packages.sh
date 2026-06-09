@@ -16,7 +16,7 @@ echo '*****************************************************************'
 # *******设置参数变量*******
 WORK_FOLDER=$(pwd)
 # 仓库根地址
-ROOT_URL=http://maven.colorcoding.org/repository/
+ROOT_URL=https://maven.colorcoding.org/repository/
 # 仓库名称
 REPOSITORY=$1
 # 设置默认仓库名称
