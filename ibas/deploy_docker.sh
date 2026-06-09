@@ -25,8 +25,8 @@ fi
 if [ "${WEBSITE}" = "" ]; then
     exit 1
 fi
-if [ ! -e ${WORK_FOLDER}/${WEBSITE} ]; then
-    mkdir -p ${WORK_FOLDER}/${WEBSITE}
+if [ ! -e "${WORK_FOLDER}/${WEBSITE}" ]; then
+    mkdir -p "${WORK_FOLDER}/${WEBSITE}"
 fi
 # 检查容器网络
 DOCKER_NET=
@@ -35,17 +35,17 @@ if [ "${DOCKER_NET}" = "" ]; then
     DOCKER_NET=ibas-net
 fi
 if [ "$(docker network ls | grep "${DOCKER_NET}")" = "" ]; then
-    echo --容器网络：$(docker network create ${DOCKER_NET})
+    echo --容器网络：$(docker network create "${DOCKER_NET}")
 fi
 # 启动容器控制台
 CONTAINER_PORTAINER=portainer
 if [ ! -e ${WORK_FOLDER}/${CONTAINER_PORTAINER} ]; then
     read -p "--创建容器管理平台（Portainer）？（n or [y]）: " PORTAINER
     if [ "${PORTAINER}" != "n" ]; then
-        mkdir -p ${WORK_FOLDER}/${CONTAINER_PORTAINER}
+        mkdir -p "${WORK_FOLDER}/${CONTAINER_PORTAINER}"
     fi
 fi
-if [ -e ${WORK_FOLDER}/${CONTAINER_PORTAINER} ]; then
+if [ -e "${WORK_FOLDER}/${CONTAINER_PORTAINER}" ]; then
     # 获取端口号
     read -p "--容器管理平台的独立端口号？（[no]）: " PORTAINER_PORT
     if [ "${PORTAINER_PORT}" != "" ]; then
@@ -60,7 +60,7 @@ if [ -e ${WORK_FOLDER}/${CONTAINER_PORTAINER} ]; then
             --network=${DOCKER_NET} \
             -m 128m \
             -v /var/run/docker.sock:/var/run/docker.sock \
-            -v ${WORK_FOLDER}/${CONTAINER_PORTAINER}:/data \
+            -v "${WORK_FOLDER}/${CONTAINER_PORTAINER}:/data" \
             ${PORTAINER_PORT} \
             portainer/portainer-ce
     )
@@ -69,10 +69,10 @@ fi
 CONTAINER_TOMCAT=ibas-tomcat-${WEBSITE}
 echo --网站容器：${CONTAINER_TOMCAT}
 # 检查数据目录
-mkdir -p ${WORK_FOLDER}/${WEBSITE}/ibas/conf/
-mkdir -p ${WORK_FOLDER}/${WEBSITE}/ibas/data/
-mkdir -p ${WORK_FOLDER}/${WEBSITE}/ibas/logs/
-mkdir -p ${WORK_FOLDER}/${WEBSITE}/ibas_packages/
+mkdir -p "${WORK_FOLDER}/${WEBSITE}/ibas/conf/"
+mkdir -p "${WORK_FOLDER}/${WEBSITE}/ibas/data/"
+mkdir -p "${WORK_FOLDER}/${WEBSITE}/ibas/logs/"
+mkdir -p "${WORK_FOLDER}/${WEBSITE}/ibas_packages/"
 
 read -p "--重建网站容器？（n or [y]）: " RESET_TOMCAT
 if [ "${RESET_TOMCAT}" != "n" ]; then
@@ -83,10 +83,10 @@ if [ "${RESET_TOMCAT}" != "n" ]; then
             JMX_PORT=8900
         fi
         # 检查环境变量文件
-        if [ -e ${WORK_FOLDER}/${WEBSITE}/tomcat_setenv.sh ]; then
-            rm -f ${WORK_FOLDER}/${WEBSITE}/tomcat_setenv.sh
+        if [ -e "${WORK_FOLDER}/${WEBSITE}/tomcat_setenv.sh" ]; then
+            rm -f "${WORK_FOLDER}/${WEBSITE}/tomcat_setenv.sh"
         fi
-        cat >${WORK_FOLDER}/${WEBSITE}/tomcat_setenv.sh <<EOF
+        cat >"${WORK_FOLDER}/${WEBSITE}/tomcat_setenv.sh" <<EOF
 # Tomcat Environment Variables
 JAVA_OPTS="\$JAVA_OPTS -Dcom.sun.management.jmxremote"
 JAVA_OPTS="\$JAVA_OPTS -Dcom.sun.management.jmxremote.authenticate=false"
@@ -105,7 +105,7 @@ EOF
     fi
     MEM_JAVA=$(expr ${MEM_TOMCAT} - 128)
     # 使用host
-    if [ -e ${WORK_FOLDER}/${WEBSITE}/hosts ]; then
+    if [ -e "${WORK_FOLDER}/${WEBSITE}/hosts" ]; then
         read -p "----检测到host文件是否使用？（[n] or y）: " USE_HOSTS
         if [ "${USE_HOSTS}" = "y" ]; then
             HOST_TOMCAT=
@@ -136,13 +136,13 @@ EOF
                 if [ "${HOST_NAME}" = "localhost" ]; then
                     continue
                 fi
-                HOST_TOMCAT=$(echo ${HOST_TOMCAT} --add-host=${HOST_NAME}:${HOST_IP})
+                HOST_TOMCAT=$(echo "${HOST_TOMCAT}" --add-host="${HOST_NAME}:${HOST_IP}")
             done <"${WORK_FOLDER}/${WEBSITE}/hosts"
         fi
     fi
     # 使用镜像
-    if [ -e ${WORK_FOLDER}/${WEBSITE}/CONTAINER_IMAGE ]; then
-        DEF_IMAGE_TOMCAT=$(cat ${WORK_FOLDER}/${WEBSITE}/CONTAINER_IMAGE)
+    if [ -e "${WORK_FOLDER}/${WEBSITE}/CONTAINER_IMAGE" ]; then
+        DEF_IMAGE_TOMCAT=$(cat "${WORK_FOLDER}/${WEBSITE}/CONTAINER_IMAGE")
     fi
     if [ "${DEF_IMAGE_TOMCAT}" = "" ]; then
         DEF_IMAGE_TOMCAT=colorcoding/tomcat:ibas-alpine
@@ -170,8 +170,8 @@ EOF
             --privileged=true \
             --network=${DOCKER_NET} \
             -m ${MEM_TOMCAT}m \
-            -v ${WORK_FOLDER}/${WEBSITE}/ibas:/usr/local/tomcat/ibas \
-            -v ${WORK_FOLDER}/${WEBSITE}/ibas_packages:/usr/local/tomcat/ibas_packages \
+            -v "${WORK_FOLDER}/${WEBSITE}/ibas:/usr/local/tomcat/ibas" \
+            -v "${WORK_FOLDER}/${WEBSITE}/ibas_packages:/usr/local/tomcat/ibas_packages" \
             -e TZ="Asia/Shanghai" \
             -e JAVA_OPTS="-Xmx${MEM_JAVA}m" \
             ${STARTUP_PARS} \
@@ -180,7 +180,7 @@ EOF
             ${LINK_TOMCAT} \
             ${IMAGE_TOMCAT}
     )
-    echo ${IMAGE_TOMCAT} >${WORK_FOLDER}/${WEBSITE}/CONTAINER_IMAGE
+    echo "${IMAGE_TOMCAT}" >"${WORK_FOLDER}/${WEBSITE}/CONTAINER_IMAGE"
 else
     # 启动更新，需要做好目录映射
     echo --网站容器：$(docker restart ${CONTAINER_TOMCAT})
@@ -200,13 +200,13 @@ docker restart ${CONTAINER_TOMCAT} >/dev/null
 
 # 启动文件服务
 CONTAINER_GOFILES=gofiles
-if [ ! -e ${WORK_FOLDER}/${CONTAINER_GOFILES} ]; then
+if [ ! -e "${WORK_FOLDER}/${CONTAINER_GOFILES}" ]; then
     read -p "--创建文件服务（Go Files）？（n or [y]）: " GOFILES
     if [ "${GOFILES}" != "n" ]; then
-        mkdir -p ${WORK_FOLDER}/${CONTAINER_GOFILES}
+        mkdir -p "${WORK_FOLDER}/${CONTAINER_GOFILES}"
     fi
 fi
-if [ -e ${WORK_FOLDER}/${CONTAINER_GOFILES} ]; then
+if [ -e "${WORK_FOLDER}/${CONTAINER_GOFILES}" ]; then
     # 获取端口号
     read -p "--文件服务的独立端口号？（[no]）: " GOFILES_PORT
     if [ "${GOFILES_PORT}" != "" ]; then
@@ -246,8 +246,8 @@ read -p "----更新根节点？（n or [y]）: " UPDATE_ROOT
 if [ "${UPDATE_ROOT}" = "n" ]; then
     exit 0
 fi
-if [ -e ${WORK_FOLDER}/root/WELCOME ]; then
-    INDEX_WELCOME=$(cat ${WORK_FOLDER}/root/WELCOME)
+if [ -e "${WORK_FOLDER}/root/WELCOME" ]; then
+    INDEX_WELCOME=$(cat "${WORK_FOLDER}/root/WELCOME")
 fi
 if [ "${INDEX_WELCOME}" = "" ]; then
     read -p "----索引页面标题？: " INDEX_WELCOME
@@ -255,7 +255,7 @@ fi
 if [ "${INDEX_WELCOME}" = "" ]; then
     INDEX_WELCOME="Welcome to ibas apps!"
 else
-    echo ${INDEX_WELCOME} >${WORK_FOLDER}/root/WELCOME
+    echo "${INDEX_WELCOME}" >"${WORK_FOLDER}/root/WELCOME"
 fi
 # 创建http相关内容
 read -p "----根节点http端口（80）: " NGINX_PORT_HTTP
@@ -263,8 +263,8 @@ if [ "${NGINX_PORT_HTTP}" = "" ]; then
     NGINX_PORT_HTTP=80
 fi
 # 检查配置文件
-if [ ! -e ${NGINX_CONFD}/default_http.conf ]; then
-    cat >${NGINX_CONFD}/default_http.conf <<EOF
+if [ ! -e "${NGINX_CONFD}/default_http.conf" ]; then
+    cat >"${NGINX_CONFD}/default_http.conf" <<EOF
 server {
     listen       80;
     server_name  localhost;
@@ -312,8 +312,8 @@ for FILE in "${NGINX_CERT}/*.key"; do
 done
 if [ -e "${SSL_CERTIFICATE}" ]; then
     if [ -e "${SSL_CERTIFICATE_KEY}" ]; then
-        if [ ! -e ${NGINX_CONFD}/default_https.conf ]; then
-            cat >${NGINX_CONFD}/default_https.conf <<EOF
+        if [ ! -e "${NGINX_CONFD}/default_https.conf" ]; then
+            cat >"${NGINX_CONFD}/default_https.conf" <<EOF
 server {
     listen       443;
     server_name  localhost;
@@ -353,9 +353,9 @@ EOF
     fi
 fi
 # 应用容器转发
-if [ ! -e ${NGINX_CONFD}/${WEBSITE}.location ]; then
+if [ ! -e "${NGINX_CONFD}/${WEBSITE}.location" ]; then
     # 配置文件需要物理存在
-    cat >${NGINX_CONFD}/${WEBSITE}.location <<EOF
+    cat >"${NGINX_CONFD}/${WEBSITE}.location" <<EOF
 location /${WEBSITE}/ {
     proxy_pass http://${CONTAINER_TOMCAT}:8080/;
     proxy_redirect off;
@@ -368,8 +368,8 @@ EOF
 fi
 # 容器管理平台转发
 if [ "${PORTAINER_PORT}" = "" ]; then
-    if [ ! -e ${NGINX_CONFD}/${CONTAINER_PORTAINER}.location ]; then
-        cat >${NGINX_CONFD}/${CONTAINER_PORTAINER}.location <<EOF
+    if [ ! -e "${NGINX_CONFD}/${CONTAINER_PORTAINER}.location" ]; then
+        cat >"${NGINX_CONFD}/${CONTAINER_PORTAINER}.location" <<EOF
 location /${CONTAINER_PORTAINER}/ {
     proxy_pass http://${CONTAINER_PORTAINER}:9000/;
     proxy_redirect off;
@@ -386,12 +386,12 @@ location /${CONTAINER_PORTAINER}/ {
 EOF
     fi
 else
-    rm -rf ${NGINX_CONFD}/${CONTAINER_PORTAINER}.location >/dev/null
+    rm -rf "${NGINX_CONFD}/${CONTAINER_PORTAINER}.location" >/dev/null
 fi
 # 文件服务转发
 if [ "${GOFILES_PORT}" = "" ]; then
-    if [ ! -e ${NGINX_CONFD}/${CONTAINER_GOFILES}.location ]; then
-        cat >${NGINX_CONFD}/${CONTAINER_GOFILES}.location <<EOF
+    if [ ! -e "${NGINX_CONFD}/${CONTAINER_GOFILES}.location" ]; then
+        cat >"${NGINX_CONFD}/${CONTAINER_GOFILES}.location" <<EOF
 location /${CONTAINER_GOFILES}/ {
     proxy_pass http://${CONTAINER_GOFILES}/;
     proxy_redirect off;
@@ -408,11 +408,11 @@ location /${CONTAINER_GOFILES}/ {
 EOF
     fi
 else
-    rm -rf ${NGINX_CONFD}/${CONTAINER_GOFILES}.location >/dev/null
+    rm -rf "${NGINX_CONFD}/${CONTAINER_GOFILES}.location" >/dev/null
 fi
 # by design转发
-if [ ! -e ${NGINX_CONFD}/sapbydesign.location ]; then
-    cat >${NGINX_CONFD}/sapbydesign.location <<EOF
+if [ ! -e "${NGINX_CONFD}/sapbydesign.location" ]; then
+    cat >"${NGINX_CONFD}/sapbydesign.location" <<EOF
 # byd cn (https://myXXXXXX.sapbyd.cn/)
 location /sap/byd/cn/ {
     resolver 223.5.5.5 223.6.6.6;
@@ -437,7 +437,7 @@ LINK_CONTAINER=
 # 链接应用
 LINK_APPS=
 # 容器管理平台索引
-if [ -e ${WORK_FOLDER}/${CONTAINER_PORTAINER} ]; then
+if [ -e "${WORK_FOLDER}/${CONTAINER_PORTAINER}" ]; then
     if [ "${PORTAINER_PORT}" = "" ]; then
         LINK_APPS="${LINK_APPS} <p><a href=\"/${CONTAINER_PORTAINER}/\" target=\"_blank\">Portainer</a></p>"
         LINK_CONTAINER="${LINK_CONTAINER} --link ${CONTAINER_PORTAINER}"
@@ -447,7 +447,7 @@ if [ -e ${WORK_FOLDER}/${CONTAINER_PORTAINER} ]; then
     fi
 fi
 # 文件服务索引
-if [ -e ${WORK_FOLDER}/${CONTAINER_GOFILES} ]; then
+if [ -e "${WORK_FOLDER}/${CONTAINER_GOFILES}" ]; then
     if [ "${GOFILES_PORT}" = "" ]; then
         LINK_APPS="${LINK_APPS} <p><a href=\"/${CONTAINER_GOFILES}/\" target=\"_blank\">GoFiles</a></p>"
         LINK_CONTAINER="${LINK_CONTAINER} --link ${CONTAINER_GOFILES}"
@@ -462,7 +462,7 @@ for ITEM in $(docker ps --format "table {{.Names}}" | grep ibas-tomcat-); do
     LINK_CONTAINER="${LINK_CONTAINER} --link ${ITEM}"
 done
 # 应用索引文件
-cat >${WORK_FOLDER}/root/index.html <<EOF
+cat >"${WORK_FOLDER}/root/index.html" <<EOF
 <!DOCTYPE html>
 <html>
 <head>
@@ -502,9 +502,9 @@ echo --根网站：$(
         -m 32m \
         -p ${NGINX_PORT_HTTP}:80 \
         -p ${NGINX_PORT_HTTPS}:443 \
-        -v ${NGINX_CONFD}:/etc/nginx/conf.d/ \
-        -v ${NGINX_CERT}:/etc/nginx/cert/ \
-        -v ${WORK_FOLDER}/root/index.html:/usr/share/nginx/html/index.html \
+        -v "${NGINX_CONFD}:/etc/nginx/conf.d/" \
+        -v "${NGINX_CERT}:/etc/nginx/cert/" \
+        -v "${WORK_FOLDER}/root/index.html:/usr/share/nginx/html/index.html" \
         colorcoding/nginx:alpine
 )
 echo ----网站地址：http://${NGINX_NAME}:${NGINX_PORT_HTTP}/${WEBSITE}/

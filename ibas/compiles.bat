@@ -25,8 +25,8 @@ for /f %%l in (%WORK_FOLDER%compile_order.txt) do (
   set FOLDER=%WORK_FOLDER%%%l
   if exist !FOLDER!\compile_packages.bat (  
     echo ----¿ªÊ¼±àÒë£º!FOLDER!
-    cd !FOLDER!
-    call !FOLDER!\compile_packages.bat
+    cd "!FOLDER!"
+    call "!FOLDER!\compile_packages.bat"
   )
 )
 cd %WORK_FOLDER%

@@ -46,23 +46,21 @@ deployWarPom() {
   POM_FILE=$2
   ARTIFACT_ID=${WAR_FILE##*/}
   ARTIFACT_ID=${ARTIFACT_ID%-*}
-  # 拼接命令
-  DEPLOY_COMMAND="mvn -q deploy:deploy-file \
-    -Dfile=${WAR_FILE} \
-    -DpomFile=${POM_FILE} \
-    -Durl=${REPOSITORY_URL} \
-    -DrepositoryId=${REPOSITORY_ID} \
-    -Dpackaging=war"
   # 执行命令
   echo ----开始部署：${ARTIFACT_ID}, ${POM_FILE}
-  eval ${DEPLOY_COMMAND}
+  mvn -q deploy:deploy-file \
+    "-Dfile=${WAR_FILE}" \
+    "-DpomFile=${POM_FILE}" \
+    "-Durl=${REPOSITORY_URL}" \
+    "-DrepositoryId=${REPOSITORY_ID}" \
+    "-Dpackaging=war"
   # 记录失败命令
   if [ $? -ne 0 ]; then
-    if [ ! -e ${WORK_FOLDER}/~redeploy_fails_wars.sh ]; then
-      echo '#!/bin/sh' >${WORK_FOLDER}/~redeploy_fails_wars.sh
+    if [ ! -e "${WORK_FOLDER}/~redeploy_fails_wars.sh" ]; then
+      echo '#!/bin/sh' >"${WORK_FOLDER}/~redeploy_fails_wars.sh"
     fi
-    echo 'echo --开始部署：'${ARTIFACT_ID} >>${WORK_FOLDER}/~redeploy_fails_wars.sh
-    echo ${DEPLOY_COMMAND} >>${WORK_FOLDER}/~redeploy_fails_wars.sh
+    echo "echo --开始部署：${ARTIFACT_ID}" >>"${WORK_FOLDER}/~redeploy_fails_wars.sh"
+    echo "mvn -q deploy:deploy-file -Dfile=${WAR_FILE} -DpomFile=${POM_FILE} -Durl=${REPOSITORY_URL} -DrepositoryId=${REPOSITORY_ID} -Dpackaging=war" >>"${WORK_FOLDER}/~redeploy_fails_wars.sh"
   fi
 }
 # 部署包，使用标记
@@ -73,25 +71,23 @@ deployWar() {
   VERSION=$2
   ARTIFACT_ID=${WAR_FILE##*/}
   ARTIFACT_ID=${ARTIFACT_ID%-*}
-  # 拼接命令
-  DEPLOY_COMMAND="mvn -q deploy:deploy-file \
-    -DgroupId=${GROUP_ID} \
-    -DartifactId=${ARTIFACT_ID} \
-    -Dversion=${VERSION} \
-    -Dfile=${WAR_FILE} \
-    -Durl=${REPOSITORY_URL} \
-    -DrepositoryId=${REPOSITORY_ID} \
-    -Dpackaging=war"
   # 执行命令
   echo ----开始部署：${ARTIFACT_ID}, ${VERSION}
-  eval ${DEPLOY_COMMAND}
+  mvn -q deploy:deploy-file \
+    "-DgroupId=${GROUP_ID}" \
+    "-DartifactId=${ARTIFACT_ID}" \
+    "-Dversion=${VERSION}" \
+    "-Dfile=${WAR_FILE}" \
+    "-Durl=${REPOSITORY_URL}" \
+    "-DrepositoryId=${REPOSITORY_ID}" \
+    "-Dpackaging=war"
   # 记录失败命令
   if [ $? -ne 0 ]; then
-    if [ ! -e ${WORK_FOLDER}/~redeploy_fails_wars.sh ]; then
-      echo '#!/bin/sh' >${WORK_FOLDER}/~redeploy_fails_wars.sh
+    if [ ! -e "${WORK_FOLDER}/~redeploy_fails_wars.sh" ]; then
+      echo '#!/bin/sh' >"${WORK_FOLDER}/~redeploy_fails_wars.sh"
     fi
-    echo 'echo --开始部署：'${ARTIFACT_ID} >>${WORK_FOLDER}/~redeploy_fails_wars.sh
-    echo ${DEPLOY_COMMAND} >>${WORK_FOLDER}/~redeploy_fails_wars.sh
+    echo "echo --开始部署：${ARTIFACT_ID}" >>"${WORK_FOLDER}/~redeploy_fails_wars.sh"
+    echo "mvn -q deploy:deploy-file -DgroupId=${GROUP_ID} -DartifactId=${ARTIFACT_ID} -Dversion=${VERSION} -Dfile=${WAR_FILE} -Durl=${REPOSITORY_URL} -DrepositoryId=${REPOSITORY_ID} -Dpackaging=war" >>"${WORK_FOLDER}/~redeploy_fails_wars.sh"
   fi
 }
 START_TIME=$(date +'%Y-%m-%d %H:%M:%S')
@@ -99,34 +95,35 @@ echo --开始时间：${START_TIME}
 echo --工作目录：${WORK_FOLDER}
 echo --发布地址：${REPOSITORY_URL}
 # 重置上传失败脚本
-if [ -e ${WORK_FOLDER}/~redeploy_fails_wars.sh ]; then
-  rm -rf ${WORK_FOLDER}/~redeploy_fails_wars.sh
+if [ -e "${WORK_FOLDER}/~redeploy_fails_wars.sh" ]; then
+  rm -rf "${WORK_FOLDER}/~redeploy_fails_wars.sh"
 fi
-while read LINE; do
-  if [ -e ${WORK_FOLDER}/${LINE}/release ]; then
+LC_ALL=C sed 's/\r//g' "${WORK_FOLDER}/compile_order.txt" | while IFS= read -r LINE; do
+  [ -z "${LINE}" ] && continue
+  if [ -e "${WORK_FOLDER}/${LINE}/release" ]; then
     echo ---开始分析：${LINE}
-    for FILE in $(find ${WORK_FOLDER}/${LINE}/release -name "ibas.*.service-*.war"); do
+    for FILE in $(find "${WORK_FOLDER}/${LINE}/release" -name "ibas.*.service-*.war"); do
       if [ "${VERSION}" = "" ]; then
         # 没提供版本号，使用POM文件
         POM=${FILE##*/}
         POM=${POM%-*}
-        POM=${WORK_FOLDER}/${LINE}/${POM}/pom.xml
-        if [ -f ${POM} ]; then
-          deployWarPom ${FILE} ${POM}
+        POM="${WORK_FOLDER}/${LINE}/${POM}/pom.xml"
+        if [ -f "${POM}" ]; then
+          deployWarPom "${FILE}" "${POM}"
         else
           echo ----没有POM文件：${FILE}
         fi
       else
         # 提供版本号
-        deployWar ${FILE} ${VERSION}
+        deployWar "${FILE}" "${VERSION}"
       fi
     done
   fi
-done <${WORK_FOLDER}/compile_order.txt | sed 's/\r//g'
-cd ${WORK_FOLDER}/
-if [ -e ${WORK_FOLDER}/~redeploy_fails_wars.sh ]; then
-  if [ ! -x ${WORK_FOLDER}/~redeploy_fails_wars.sh ]; then
-    chmod +x ${WORK_FOLDER}/~redeploy_fails_wars.sh
+done
+cd "${WORK_FOLDER}/"
+if [ -e "${WORK_FOLDER}/~redeploy_fails_wars.sh" ]; then
+  if [ ! -x "${WORK_FOLDER}/~redeploy_fails_wars.sh" ]; then
+    chmod +x "${WORK_FOLDER}/~redeploy_fails_wars.sh"
   fi
 fi
 # 计算执行时间

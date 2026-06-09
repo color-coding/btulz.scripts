@@ -7,7 +7,7 @@ echo                    2018.01.27
 echo  说明：
 echo     1. 分析jar包创建数据结构和初始化数据，需要在Tomcat目录。
 echo     2. 参数1，配置文件（app.xml）路径，默认WEB-INF\app.xml。
-echo     3. 提前下载btulz.transforms并放置.\ibas_tools\目录。
+echo     3. 提前下载btulz.transforms并放置./ibas_tools/目录。
 echo     4. 注意维护ibas.release的顺序说明。
 echo *****************************************************************
 rem 设置参数变量
@@ -16,7 +16,7 @@ if "%1" neq "" (
     echo not found config file, %1.
     goto :EOF
   )
-set IBAS_APP=%1
+  set IBAS_APP=%1
 )
 rem 设置参数变量
 set WORK_FOLDER=%CD%
@@ -109,16 +109,16 @@ rem 注意：命令字符太长，系统不能执行
   set JarFile=%1
   set Config=%2
   set Classes=%3
-  set COMMOND=java -jar %TOOLS_TRANSFORM% init -data=%JarFile% -config=%Config% -classes=%Classes%
-  echo 运行：%COMMOND%
-  call %COMMOND%
+  set COMMAND=java -jar %TOOLS_TRANSFORM% init -data=%JarFile% -config=%Config% -classes=%Classes%
+  echo 运行：%COMMAND%
+  call %COMMAND%
 goto :EOF
 rem 函数，初始化数据。参数1，分析的jar包 参数2，配置文件
 rem 注意：命令字符太长，系统不能执行
 :INIT_DS
   set JarFile=%1
   set Config=%2
-  set COMMOND=java -jar %TOOLS_TRANSFORM% ds -data=%JarFile% -config=%Config%
-  echo 运行：%COMMOND%
-  call %COMMOND%
+  set COMMAND=java -jar %TOOLS_TRANSFORM% ds -data=%JarFile% -config=%Config%
+  echo 运行：%COMMAND%
+  call %COMMAND%
 goto :EOF

@@ -23,20 +23,21 @@ fi
 
 echo --工作的目录：${WORK_FOLDER}
 # 获取编译顺序
-if [ ! -e ${WORK_FOLDER}/compile_order.txt ]; then
-  ls -lt ${WORK_FOLDER} | awk '/^d/{print $NF}' >${WORK_FOLDER}/compile_order.txt
+if [ ! -e "${WORK_FOLDER}/compile_order.txt" ]; then
+  ls -lt "${WORK_FOLDER}" | awk '/^d/{print $NF}' >"${WORK_FOLDER}/compile_order.txt"
 fi
 # 遍历当前目录
-while read folder; do
-  cd ${WORK_FOLDER}/${folder}
+LC_ALL=C sed 's/\r//g' "${WORK_FOLDER}/compile_order.txt" | while IFS= read -r folder; do
+  [ -z "${folder}" ] && continue
+  cd "${WORK_FOLDER}/${folder}" || continue
   echo --清理目录：$(pwd)
   rm -f *log*.txt
   rm -rf release
-  # 清理符号链接
-  for tmp in $(find ${WORK_FOLDER}/${folder} -type l); do
-    if [ -e ${tmp} ]; then
-      rm -f ${tmp} >/dev/null
+  # 清理失效的符号链接
+  for tmp in $(find "${WORK_FOLDER}/${folder}" -type l); do
+    if [ ! -e "${tmp}" ]; then
+      rm -f "${tmp}" >/dev/null
     fi
   done
-done <${WORK_FOLDER}/compile_order.txt | sed 's/\r//g'
-cd ${WORK_FOLDER}
+done
+cd "${WORK_FOLDER}"

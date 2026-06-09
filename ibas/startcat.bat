@@ -70,12 +70,12 @@ rem     参数2，文件类型
     if "%CHOOSE%" equ "" goto :END_FUNC
 
     if "%CHOOSE%" equ "0" (
-        copy /y "%FILE_FOLDER%\~last.%FILE_TYPE%" "%FILE_FOLDER%\%FILE_TYPE%" >>nil
+        copy /y "%FILE_FOLDER%\~last.%FILE_TYPE%" "%FILE_FOLDER%\%FILE_TYPE%" >>nul
         goto :END_FUNC
     )
     echo --使用文件：!FILE_NAMES[%CHOOSE%]!
-    copy /y "%FILE_FOLDER%\%FILE_TYPE%" "%FILE_FOLDER%\~last.%FILE_TYPE%" >>nil
-    copy /y "!FILE_NAMES[%CHOOSE%]!" "%FILE_FOLDER%\%FILE_TYPE%" >>nil
+    copy /y "%FILE_FOLDER%\%FILE_TYPE%" "%FILE_FOLDER%\~last.%FILE_TYPE%" >>nul
+    copy /y "!FILE_NAMES[%CHOOSE%]!" "%FILE_FOLDER%\%FILE_TYPE%" >>nul
 
 :END_FUNC
     for /L %%i in (1, 1, %INDEX%) DO (

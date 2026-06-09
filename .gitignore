@@ -9,3 +9,7 @@ release/
 
 # mac os files
 .DS_Store
+
+# claude code
+.claude
+CLAUDE.md

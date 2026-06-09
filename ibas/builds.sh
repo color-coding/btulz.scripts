@@ -4,9 +4,9 @@ echo '              builds.sh                                                   
 echo '                      by niuren.zhu                                         '
 echo '                           2017.06.01                                       '
 echo '  说明：                                                                     '
-echo '    1. 遍历工作目录，存在build_all.bat则调用。                                  '
+echo '    1. 遍历工作目录，存在build_all.sh则调用。                                   '
 echo '    2. 使用uglifyjs压缩*.js文件为*.min.js。                                    '
-echo '    3. 参数1，编译的模块名称，不提供时使用compile_order.txt文件。                  '
+echo '    3. 参数，编译的模块名称，不提供时使用compile_order.txt文件。                  '
 echo '    4. 环境变量[TS_COMPRESS_DISABLED=true]，则不开启文件压缩。                   '
 echo '    5. 环境变量[TS_COMPRESS_NO_ORIGINAL=true]，则不保留原始文件。                '
 echo '****************************************************************************'
@@ -33,18 +33,18 @@ fi
 COMPILE_ORDER=$@
 if [ "${COMPILE_ORDER}" = "" ]; then
   # 没提供编译内容，则使用文件
-  if [ ! -e ${WORK_FOLDER}/compile_order.txt ]; then
+  if [ ! -e "${WORK_FOLDER}/compile_order.txt" ]; then
     # 文件不存在，先构建
-    ls -ltr ${WORK_FOLDER} | awk '/^d/{print $NF}' >${WORK_FOLDER}/compile_order.txt
+    ls -ltr "${WORK_FOLDER}" | awk '/^d/{print $NF}' >"${WORK_FOLDER}/compile_order.txt"
   fi
-  COMPILE_ORDER=$(cat ${WORK_FOLDER}/compile_order.txt)
+  COMPILE_ORDER=$(cat "${WORK_FOLDER}/compile_order.txt")
 fi
 # 开始遍历目录
 for folder in ${COMPILE_ORDER}; do
-  for builder in $(find ${WORK_FOLDER}/${folder} -type f -name build_all.sh); do
+  for builder in $(find "${WORK_FOLDER}/${folder}" -type f -name "build_all.sh"); do
     # 运行编译命令
     if [ ! -x "${builder}" ]; then
-      chmod 775 ${builder}
+      chmod +x "${builder}"
     fi
     echo --开始调用：${builder}
     "${builder}"
@@ -52,18 +52,18 @@ for folder in ${COMPILE_ORDER}; do
   # 尝试压缩js文件
   if [ "${COMPRESS}" = "true" ]; then
     # 遍历当前目录
-    for file in $(find ${WORK_FOLDER}/${folder} -type f -name *.js ! -name *.min.js ! -path "*3rdparty*" ! -path "*openui5/resources*" ! -path "*target*" ! -path "*test/integration*"); do
+    for file in $(find "${WORK_FOLDER}/${folder}" -type f -name "*.js" ! -name "*.min.js" ! -path "*3rdparty*" ! -path "*openui5/resources*" ! -path "*target*" ! -path "*test/integration*"); do
       compressed=${file%.js*}.min.js
       echo --开始压缩：${file}
-      uglifyjs --compress --safari10 --keep-classnames --keep-fnames --mangle --output ${compressed} ${file}
+      uglifyjs --compress --safari10 --keep-classnames --keep-fnames --mangle --output "${compressed}" "${file}"
       if [ "${TS_COMPRESS_NO_ORIGINAL}" = "true" ];then
-          cp -f ${compressed} ${file}
+          cp -f "${compressed}" "${file}"
       fi
     done
   fi
   echo '****************************************************************************'
 done
-cd ${WORK_FOLDER}
+cd "${WORK_FOLDER}"
 # 计算执行时间
 END_TIME=$(date +'%Y-%m-%d %H:%M:%S')
 if [ "$(uname)" = "Darwin" ]; then

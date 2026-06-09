@@ -5,10 +5,10 @@ echo '                      by niuren.zhu                                       
 echo '                           2017.06.18                                                '
 echo '  说明：                                                                              '
 echo '    1. 部署IBAS的WAR包到应用目录，需要以管理员权限启动。                                    '
-echo '    2. 参数1，IBAS数据目录，默认.\ibas。                                                 '
-echo '    3. 参数2，IBAS的包位置，默认.\ibas_packages。                                        '
-echo '    4. 参数3，IBAS部署目录，默认.\webapps。                                              '
-echo '    5. 参数4，IBAS共享库目录，默认.\ibas_lib。                                           '
+echo '    2. 参数1，IBAS主目录，默认./ibas。                                                    '
+echo '    3. 参数2，IBAS的包位置，默认./ibas_packages。                                         '
+echo '    4. 参数3，IBAS部署目录，默认./webapps。                                               '
+echo '    5. 参数4，IBAS共享库目录，默认./ibas_lib。                                            '
 echo '    6. 脚本通文件链接方式，集中配置文件和日志目录到IBAS_HOME下。                             '
 echo '    7. 请提前安装unzip，或拷贝到.\ibas_tools目录。                                       '
 echo '    8. 请调整catalina.properties的shared.loader="${catalina.home}/ibas_lib/*.jar"。  '
@@ -59,12 +59,12 @@ echo 数据目录：${IBAS_HOME}
 echo ----------------------------------------------------
 # 部署顺序排序
 if [ ! -e "${IBAS_PACKAGE}/ibas.deploy.order.txt" ]; then
-  cd ${IBAS_PACKAGE}
-  ls -ltr *.war | awk '//{print $NF}' >>"${IBAS_PACKAGE}/ibas.deploy.order.txt"
-  cd ${WORK_FOLDER}
+  cd "${IBAS_PACKAGE}" || exit 1
+  ls -ltr *.war 2>/dev/null | awk '//{print $NF}' >>"${IBAS_PACKAGE}/ibas.deploy.order.txt"
+  cd "${WORK_FOLDER}"
 fi
 echo 开始解压模块，到目录${IBAS_DEPLOY}
-while read file; do
+LC_ALL=C sed 's/\r//g' "${IBAS_PACKAGE}/ibas.deploy.order.txt" | while IFS= read -r file; do
   file=${file%.war*}.war
   echo 释放"${IBAS_PACKAGE}/${file}"
   # 修正war包的解压目录
@@ -114,10 +114,10 @@ while read file; do
     ln -s "${IBAS_CONF}/config.json" "${IBAS_DEPLOY}/${folder}/config.json"
   fi
   # 备份程序包
-  mv "${IBAS_PACKAGE}/${file}" ${IBAS_PACKAGE_BACKUP}/${file}
-done <"${IBAS_PACKAGE}/ibas.deploy.order.txt" | sed 's/\r//g'
+  mv "${IBAS_PACKAGE}/${file}" "${IBAS_PACKAGE_BACKUP}/${file}"
+done
 # 备份顺序文件
-mv "${IBAS_PACKAGE}/ibas.deploy.order.txt" ${IBAS_PACKAGE_BACKUP}/ibas.deploy.order.txt
+mv "${IBAS_PACKAGE}/ibas.deploy.order.txt" "${IBAS_PACKAGE_BACKUP}/ibas.deploy.order.txt"
 # 修正ROOT目录
 if [ -e "${IBAS_DEPLOY}/root" ]; then
   if [ ! -e "${WORK_FOLDER}/IBAS_PACKAGES" ]; then
@@ -135,13 +135,13 @@ if [ -e "${IBAS_LIB}" ]; then
   touch "${IBAS_LIB}/~file_types.txt"
   for file in $(ls -r "${IBAS_LIB}" | awk '//{print $NF}'); do
     file_type=!${file%-*}-!
-    grep -l ${file_type} "${IBAS_LIB}/~file_types.txt" >/dev/null
+    grep -l "${file_type}" "${IBAS_LIB}/~file_types.txt" >/dev/null
     if [ $? -eq 0 ]; then
       echo --清理[${file}]
       rm -rf "${IBAS_LIB}/${file}"
-      echo ${file} >>"${IBAS_LIB}/~deleted_files.txt"
+      echo "${file}" >>"${IBAS_LIB}/~deleted_files.txt"
     else
-      echo ${file_type} >>"${IBAS_LIB}/~file_types.txt"
+      echo "${file_type}" >>"${IBAS_LIB}/~file_types.txt"
     fi
   done
 fi
