@@ -64,7 +64,7 @@ Shell/Batch scripts for IBAS framework — covering compilation, deployment, dat
 | `update_db.sh` | 更新数据库结构 | 参数1：结构文件（jar/xml/目录）；参数2：配置文件 |
 | `update_routing.sh` / `update_routing.bat` | 生成服务路由配置 | 参数1：配置文件；参数2：输出文件；参数3：数据服务地址；参数4：视图服务地址；参数5：共享库目录 |
 | `deploy_wars.sh` | 发布 WAR 包到 Maven 仓库 | 参数1：版本号；参数2：仓库地址；参数3：仓库标识 |
-| `startcat.sh` / `startcat.bat` | 选择配置并启动 Tomcat | 无参数 |
+| `startcat.sh` / `startcat.bat` | 选择配置并启动 Tomcat（支持后台/前台模式） | 无参数，交互选择启动模式 |
 
 ### Docker 部署 | Docker
 

@@ -4,47 +4,87 @@ echo ***************************************************************************
 echo                    startcat.bat
 echo                          by niuren.zhu
 echo                          2021.01.14
-echo          Ëµï¿½ï¿½ï¿½ï¿½
-echo              1. ï¿½ï¿½Ê¾ï¿½ï¿½Ñ¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¼ï¿½ï¿½ï¿½
-echo              2. ï¿½ï¿½ï¿½ï¿½Tomcatï¿½ï¿½
+echo          ËµÃ÷£º
+echo              1. ÁÐÊ¾²¢Ñ¡ÔñÅäÖÃÎÄ¼þ¡£
+echo              2. Ñ¡ÔñÆô¶¯Ä£Ê½£¨ºóÌ¨/Ç°Ì¨£©¡£
+echo              3. Æô¶¯Tomcat¡£
 echo **************************************************************************************
-rem ï¿½ï¿½ï¿½Ã²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+rem ÉèÖÃ²ÎÊý±äÁ¿
 set WORK_FOLDER=%~dp0
 
 set CONFIG_FOLDER=%WORK_FOLDER%\ibas\conf
 set TOMCAT=%WORK_FOLDER%\bin\startup.bat
+set CATALINA=%WORK_FOLDER%\bin\catalina.bat
 
-rem ï¿½ï¿½é»·ï¿½ï¿½
+rem ¼ì²é»·¾³
 if not exist "%CONFIG_FOLDER%" (
-    echo --Ã»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¼ï¿½ï¿½ï¿½
+    echo --Ã»ÓÐÅäÖÃÎÄ¼þ¼Ð
     goto :EOF
 )
 if not exist "%TOMCAT%" (
-    echo --Ã»ï¿½ï¿½TOMCATï¿½ï¿½ï¿½ï¿½ï¿½Å±ï¿½
+    echo --Ã»ÓÐTOMCATÆô¶¯½Å±¾
     goto :EOF
 )
 
-rem Ñ¡ï¿½ï¿½ï¿½Ä¼ï¿½
-echo --ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¼ï¿½Ñ¡ï¿½ï¿½
+rem Æô¶¯Ç°ÇåÀíÔËÐÐÄ¿Â¼£ºÈÕÖ¾±£Áô×î½ü3Ìì£¬ÆäÓàÁÙÊ±Ä¿Â¼È«²¿Çå¿Õ
+echo --ÇåÀíTomcatÔËÐÐÄ¿Â¼
+if exist "%WORK_FOLDER%catalina.out" type nul > "%WORK_FOLDER%catalina.out"
+call :CLEAN_LOG_FOLDER "%WORK_FOLDER%logs"
+call :CLEAN_LOG_FOLDER "%WORK_FOLDER%ibas\logs"
+call :CLEAN_FOLDER "%WORK_FOLDER%temp"
+call :CLEAN_FOLDER "%WORK_FOLDER%ibas_packages\backup"
+call :CLEAN_FOLDER "%WORK_FOLDER%history"
+
+rem Ñ¡ÔñÎÄ¼þ
+echo --ºó¶ËÅäÖÃÎÄ¼þÑ¡Ôñ
 call :CHOOSE_FILE %CONFIG_FOLDER% app.xml
 echo.
 
-echo --ï¿½ï¿½ï¿½ï¿½Â·ï¿½ï¿½ï¿½Ä¼ï¿½Ñ¡ï¿½ï¿½
+echo --·þÎñÂ·ÓÉÎÄ¼þÑ¡Ôñ
 call :CHOOSE_FILE %CONFIG_FOLDER% service_routing.xml
 echo.
 
-echo --Ç°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¼ï¿½Ñ¡ï¿½ï¿½
+echo --Ç°¶ËÅäÖÃÎÄ¼þÑ¡Ôñ
 call :CHOOSE_FILE %CONFIG_FOLDER% config.json
 echo.
 
-echo --ï¿½ï¿½ï¿½ï¿½Tomcat
-call "%TOMCAT%"
+rem Ñ¡ÔñÆô¶¯Ä£Ê½
+echo --Æô¶¯Ä£Ê½Ñ¡Ôñ
+echo   1) ºóÌ¨Æô¶¯£¨ÈÕÖ¾Êä³öµ½ÎÄ¼þ£©
+echo   2) Ç°Ì¨Æô¶¯£¨Ä¬ÈÏ£¬µ±Ç°ÖÕ¶ËÊä³öÈÕÖ¾£©
+set START_MODE=2
+set /p START_MODE=--ÇëÊäÈëÆô¶¯Ä£Ê½[2]: 
+
+if "%START_MODE%" equ "1" (
+    echo --ºóÌ¨Æô¶¯Tomcat
+    call "%TOMCAT%"
+) else (
+    if exist "%CATALINA%" (
+        echo --Ç°Ì¨Æô¶¯Tomcat£¬ÈÕÖ¾Êä³öµ½µ±Ç°ÖÕ¶Ë£¬°´Ctrl+C¿ÉÍ£Ö¹
+        call "%CATALINA%" run
+    ) else (
+        echo --Î´ÕÒµ½catalina½Å±¾[%CATALINA%]£¬Ê¹ÓÃºóÌ¨Æô¶¯
+        call "%TOMCAT%"
+    )
+)
 
 goto :EOF
 
-rem ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾ï¿½ï¿½Ñ¡ï¿½ï¿½ï¿½Ä¼ï¿½ï¿½ï¿½
-rem     ï¿½ï¿½ï¿½ï¿½1ï¿½ï¿½ï¿½Ä¼ï¿½Ä¿Â¼
-rem     ï¿½ï¿½ï¿½ï¿½2ï¿½ï¿½ï¿½Ä¼ï¿½ï¿½ï¿½ï¿½ï¿½
+rem Çå¿ÕÖ¸¶¨Ä¿Â¼ÄÚÈÝ£¬±£ÁôÄ¿Â¼±¾Éí
+:CLEAN_LOG_FOLDER
+    if not exist "%~1\" goto :EOF
+    powershell -NoProfile -ExecutionPolicy Bypass -Command "Get-ChildItem -LiteralPath '%~1' -File -Recurse | Where-Object { $_.CreationTime -lt (Get-Date).AddDays(-3) } | Remove-Item -Force" >nul 2>&1
+goto :EOF
+
+:CLEAN_FOLDER
+    if not exist "%~1\" goto :EOF
+    del /f /q /a "%~1\*" >nul 2>&1
+    for /d %%d in ("%~1\*") do rd /s /q "%%~fd" >nul 2>&1
+goto :EOF
+
+rem º¯Êý£ºÁÐÊ¾²¢Ñ¡ÔñÎÄ¼þ
+rem     ²ÎÊý1£ºÎÄ¼þÄ¿Â¼
+rem     ²ÎÊý2£ºÎÄ¼þÀàÐÍ
 :CHOOSE_FILE
     set FILE_FOLDER=%1
     set FILE_TYPE=%2
@@ -66,14 +106,14 @@ rem     ï¿½ï¿½ï¿½ï¿½2ï¿½ï¿½ï¿½Ä¼ï¿½ï¿½ï¿½ï¿½ï¿½
     )
     if exist "%FILE_FOLDER%\~last.%FILE_TYPE%" echo "0) ~last.%FILE_TYPE%"
 
-    set /p CHOOSE=--ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½ï¿½ï¿½Ä¼ï¿½ï¿½ï¿½ï¿½:
+    set /p CHOOSE=--ÇëÊäÈëÑ¡ÔñµÄÎÄ¼þÐòºÅ:
     if "%CHOOSE%" equ "" goto :END_FUNC
 
     if "%CHOOSE%" equ "0" (
         copy /y "%FILE_FOLDER%\~last.%FILE_TYPE%" "%FILE_FOLDER%\%FILE_TYPE%" >>nul
         goto :END_FUNC
     )
-    echo --Ê¹ï¿½ï¿½ï¿½Ä¼ï¿½ï¿½ï¿½!FILE_NAMES[%CHOOSE%]!
+    echo --Ê¹ÓÃÎÄ¼þ£º!FILE_NAMES[%CHOOSE%]!
     copy /y "%FILE_FOLDER%\%FILE_TYPE%" "%FILE_FOLDER%\~last.%FILE_TYPE%" >>nul
     copy /y "!FILE_NAMES[%CHOOSE%]!" "%FILE_FOLDER%\%FILE_TYPE%" >>nul
 

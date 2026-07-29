@@ -54,7 +54,7 @@ if "%IBAS_APP%" neq "" echo 配置文件：%IBAS_APP%
 echo ----------------------------------------------------
 
 echo 开始分析[%IBAS_DEPLOY%]目录
-set DB_JAR=bobas.businessobjectscommon.*.jar
+set DB_JAR=bobas.businessobjectscommon*.jar
 rem 开始发布当前版本
 if not exist "%IBAS_DEPLOY%ibas.release.txt" dir /D /B /OD /A:D "%IBAS_DEPLOY%" >"%IBAS_DEPLOY%ibas.release.txt"
 for /f %%m in (%IBAS_DEPLOY%ibas.release.txt) DO (
