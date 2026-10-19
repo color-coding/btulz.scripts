@@ -1,4 +1,6 @@
 #!/bin/sh
+# Preserve POSIX shell semantics when invoked explicitly through zsh.
+[ -z "${ZSH_VERSION:-}" ] || exec sh "$0" "$@"
 echo '****************************************************************************'
 echo '              compiles.sh                                                   '
 echo '                      by niuren.zhu                                         '
@@ -16,29 +18,39 @@ START_TIME=$(date +'%Y-%m-%d %H:%M:%S')
 echo --开始时间：${START_TIME}
 echo --工作目录：${WORK_FOLDER}
 
-# 获取编译内容
-COMPILE_ORDER=$@
-if [ "${COMPILE_ORDER}" = "" ]; then
-  # 没提供编译内容，则使用文件
-  if [ ! -e "${WORK_FOLDER}/compile_order.txt" ]; then
-    # 文件不存在，先构建
-    ls -ltr "${WORK_FOLDER}" | awk '/^d/{print $NF}' >"${WORK_FOLDER}/compile_order.txt"
-  fi
-  COMPILE_ORDER=$(cat "${WORK_FOLDER}/compile_order.txt")
-fi
-# 遍历当前目录
-for folder in ${COMPILE_ORDER}; do
-  [ -z "${folder}" ] && continue
-  if [ -e "${WORK_FOLDER}/${folder}/compile_packages.sh" ]; then
-    if [ ! -x "${WORK_FOLDER}/${folder}/compile_packages.sh" ]; then
-      chmod +x "${WORK_FOLDER}/${folder}/compile_packages.sh"
+# 每个参数或每一行代表一个模块，保留空格并兼容 CRLF 清单。
+runModule() {
+  folder=$1
+  [ -n "${folder}" ] || return 0
+  [ -d "${WORK_FOLDER%/}/${folder}" ] || return 1
+  if [ -e "${WORK_FOLDER%/}/${folder}/compile_packages.sh" ]; then
+    if [ ! -x "${WORK_FOLDER%/}/${folder}/compile_packages.sh" ]; then
+      chmod +x "${WORK_FOLDER%/}/${folder}/compile_packages.sh" || return 1
     fi
-    cd "${WORK_FOLDER}/${folder}" || continue
-    echo ----开始编译：$(pwd)
-    "${WORK_FOLDER}/${folder}/compile_packages.sh"
+    (
+      cd "${WORK_FOLDER%/}/${folder}" || exit 1
+      echo ----开始编译：$(pwd)
+      "${WORK_FOLDER%/}/${folder}/compile_packages.sh"
+    ) || return 1
   fi
   echo '****************************************************************************'
-done
+}
+if [ "$#" -gt 0 ]; then
+  for folder do
+    runModule "${folder}" || exit 1
+  done
+else
+  if [ ! -e "${WORK_FOLDER%/}/compile_order.txt" ]; then
+    # 文件不存在，先构建
+    ls -1trd "${WORK_FOLDER%/}/"*/ 2>/dev/null | while IFS= read -r directory; do
+      directory=${directory%/}
+      printf '%s\n' "${directory##*/}"
+    done >"${WORK_FOLDER%/}/compile_order.txt"
+  fi
+  LC_ALL=C sed 's/\r//g' "${WORK_FOLDER%/}/compile_order.txt" | while IFS= read -r folder || [ -n "$folder" ]; do
+    runModule "${folder}" || exit 1
+  done || exit 1
+fi
 cd "${WORK_FOLDER}"
 # 计算执行时间
 END_TIME=$(date +'%Y-%m-%d %H:%M:%S')

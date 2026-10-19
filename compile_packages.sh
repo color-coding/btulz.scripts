@@ -1,4 +1,6 @@
 #!/bin/sh
+# Preserve POSIX shell semantics when invoked explicitly through zsh.
+[ -z "${ZSH_VERSION:-}" ] || exec sh "$0" "$@"
 echo '****************************************************************************'
 echo '             compile_packages.sh                                            '
 echo '                      by niuren.zhu                                         '
@@ -16,14 +18,14 @@ WORK_FOLDER=$(pwd)
 echo --当前工作的目录是[${WORK_FOLDER}]
 
 echo --清除项目缓存
-if [ -e ${WORK_FOLDER}/release/ ]; then
-  rm -rf ${WORK_FOLDER}/release/
+if [ -e "${WORK_FOLDER%/}/release/" ]; then
+  rm -rf "${WORK_FOLDER%/}/release/"
 fi
-mkdir -p ${WORK_FOLDER}/release/
+mkdir -p "${WORK_FOLDER%/}/release/"
 
 echo --压缩文件为tar包
 tar -cvf btulz.scripts.tar ibas/*.sh ibas/*.bat
-cp -f btulz.scripts.tar ${WORK_FOLDER}/release/
+cp -f btulz.scripts.tar "${WORK_FOLDER%/}/release/"
 rm -rf btulz.scripts.tar
 
 echo --编译完成

@@ -16,11 +16,12 @@ echo    8. 提前配置app.xml的数据库信息。
 echo *****************************************************************
 rem 设置参数变量
 set "WORK_FOLDER=%CD%"
+if not "%WORK_FOLDER:~-1%"=="\" set "WORK_FOLDER=%WORK_FOLDER%\"
 rem 设置ibas_tools目录
-set TOOLS_FOLDER=%WORK_FOLDER%\ibas_tools\
-set TOOLS_TRANSFORM=
+set "TOOLS_FOLDER=%WORK_FOLDER%ibas_tools\"
+set "TOOLS_TRANSFORM="
 for /f "delims=" %%i in ('dir /b "%TOOLS_FOLDER%btulz.transforms.bobas-*.jar"') do (
-  set TOOLS_TRANSFORM=%TOOLS_FOLDER%%%i
+  set "TOOLS_TRANSFORM=%TOOLS_FOLDER%%%i"
 )
 if not exist "%TOOLS_TRANSFORM%" (
   echo not found btulz.transforms, in [%TOOLS_FOLDER%].
@@ -28,14 +29,14 @@ if not exist "%TOOLS_TRANSFORM%" (
 )
 
 rem 设置java路径
-if exist "%WORK_FOLDER%\jdk\bin" (
-  set "JAVA_HOME=%WORK_FOLDER%\jdk"
-  set "PATH=%JAVA_HOME%\bin;%PATH%"
+if exist "%WORK_FOLDER%jdk\bin" (
+  set "JAVA_HOME=%WORK_FOLDER%jdk"
+  set "PATH=!JAVA_HOME!\bin;%PATH%"
 )
 
 rem 设置配置文件
 set "CONF_APP=%~1"
-if "%CONF_APP%"=="" set "CONF_APP=%WORK_FOLDER%\ibas\conf\app.xml"
+if "%CONF_APP%"=="" set "CONF_APP=%WORK_FOLDER%ibas\conf\app.xml"
 if not exist "%CONF_APP%" (
   echo not found app.xml.
   exit /b 1
@@ -43,7 +44,7 @@ if not exist "%CONF_APP%" (
 
 rem 设置输出文件
 set "CONF_ROUTING=%~2"
-if "%CONF_ROUTING%"=="" set "CONF_ROUTING=%WORK_FOLDER%\ibas\conf\service_routing.xml"
+if "%CONF_ROUTING%"=="" set "CONF_ROUTING=%WORK_FOLDER%ibas\conf\service_routing.xml"
 
 rem 设置数据服务地址
 set "URL_DATA=%~3"
@@ -55,7 +56,10 @@ if "%URL_VIEW%"=="" set "URL_VIEW=.../${ModuleName}/"
 
 rem 设置LIB目录
 set "IBAS_LIB=%~5"
-if "%IBAS_LIB%"=="" set "IBAS_LIB=%WORK_FOLDER%\ibas_lib"
+if "%IBAS_LIB%"=="" set "IBAS_LIB=%WORK_FOLDER%ibas_lib"
+set "IBAS_LIB=%IBAS_LIB:/=\%"
+for %%I in ("%IBAS_LIB%\.") do set "IBAS_LIB=%%~fI"
+if not "%IBAS_LIB:~-1%"=="\" set "IBAS_LIB=%IBAS_LIB%\"
 
 
 rem 显示参数信息
@@ -69,12 +73,12 @@ echo 共享LIB目录：%IBAS_LIB%
 echo ----------------------------------------------------
 
 rem 链接数据库类（在Windows中创建硬链接而非符号链接）
-for %%F in ("%IBAS_LIB%\bobas*.db*.jar") do (
-  if not exist "%TOOLS_FOLDER%\%%~nxF" (
-    mklink /H "%TOOLS_FOLDER%\%%~nxF" "%%F" >nul 2>&1
+for %%F in ("%IBAS_LIB%bobas*.db*.jar") do (
+  if not exist "%TOOLS_FOLDER%%%~nxF" (
+    mklink /H "%TOOLS_FOLDER%%%~nxF" "%%~fF" >nul 2>&1
     if errorlevel 1 (
       echo Failed to create hard link for %%~nxF, copying instead.
-      copy "%%F" "%TOOLS_FOLDER%\%%~nxF" >nul
+      copy "%%~fF" "%TOOLS_FOLDER%%%~nxF" >nul
     )
   )
 )

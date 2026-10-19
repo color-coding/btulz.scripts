@@ -23,36 +23,48 @@ for /f "skip=1 delims=" %%a in ('wmic os get localdatetime /value') do (
     )  
 )
 rem 设置参数变量
-set WORK_FOLDER=%~dp0
+set "WORK_FOLDER=%~dp0"
 rem 设置ibas目录
-set IBAS_HOME=%1
-if "%IBAS_HOME%" equ "" set IBAS_HOME=%WORK_FOLDER%ibas\
+set "IBAS_HOME=%~1"
+if "%IBAS_HOME%" equ "" set "IBAS_HOME=%WORK_FOLDER%ibas\"
+set "IBAS_HOME=%IBAS_HOME:/=\%"
+for %%I in ("%IBAS_HOME%\.") do set "IBAS_HOME=%%~fI"
+if not "%IBAS_HOME:~-1%"=="\" set "IBAS_HOME=%IBAS_HOME%\"
 if not exist "%IBAS_HOME%" mkdir "%IBAS_HOME%"
 rem ibas配置目录
-set IBAS_CONF=%IBAS_HOME%conf\
+set "IBAS_CONF=%IBAS_HOME%conf\"
 if not exist "%IBAS_CONF%" mkdir "%IBAS_CONF%"
 rem ibas数据目录
-set IBAS_DATA=%IBAS_HOME%data\
+set "IBAS_DATA=%IBAS_HOME%data\"
 if not exist "%IBAS_DATA%" mkdir "%IBAS_DATA%"
 rem ibas日志目录
-set IBAS_LOG=%IBAS_HOME%logs\
+set "IBAS_LOG=%IBAS_HOME%logs\"
 if not exist "%IBAS_LOG%" mkdir "%IBAS_LOG%"
 rem 设置IBAS_PACKAGE目录
-set IBAS_PACKAGE=%2
-if "%IBAS_PACKAGE%" equ "" set IBAS_PACKAGE=%WORK_FOLDER%ibas_packages\
+set "IBAS_PACKAGE=%~2"
+if "%IBAS_PACKAGE%" equ "" set "IBAS_PACKAGE=%WORK_FOLDER%ibas_packages\"
+set "IBAS_PACKAGE=%IBAS_PACKAGE:/=\%"
+for %%I in ("%IBAS_PACKAGE%\.") do set "IBAS_PACKAGE=%%~fI"
+if not "%IBAS_PACKAGE:~-1%"=="\" set "IBAS_PACKAGE=%IBAS_PACKAGE%\"
 rem 设置IBAS_DEPLOY目录
-set IBAS_DEPLOY=%3
-if "%IBAS_DEPLOY%" equ "" set IBAS_DEPLOY=%WORK_FOLDER%webapps\
+set "IBAS_DEPLOY=%~3"
+if "%IBAS_DEPLOY%" equ "" set "IBAS_DEPLOY=%WORK_FOLDER%webapps\"
+set "IBAS_DEPLOY=%IBAS_DEPLOY:/=\%"
+for %%I in ("%IBAS_DEPLOY%\.") do set "IBAS_DEPLOY=%%~fI"
+if not "%IBAS_DEPLOY:~-1%"=="\" set "IBAS_DEPLOY=%IBAS_DEPLOY%\"
 if not exist "%IBAS_DEPLOY%" mkdir "%IBAS_DEPLOY%"
 rem 设置lib目录
-set IBAS_LIB=%4
-if "%IBAS_LIB%" equ "" set IBAS_LIB=%WORK_FOLDER%ibas_lib\
+set "IBAS_LIB=%~4"
+if "%IBAS_LIB%" equ "" set "IBAS_LIB=%WORK_FOLDER%ibas_lib\"
+set "IBAS_LIB=%IBAS_LIB:/=\%"
+for %%I in ("%IBAS_LIB%\.") do set "IBAS_LIB=%%~fI"
+if not "%IBAS_LIB:~-1%"=="\" set "IBAS_LIB=%IBAS_LIB%\"
 if not exist "%IBAS_LIB%" mkdir "%IBAS_LIB%"
 rem 设置7z
-set TOOL_7Z=%WORK_FOLDER%ibas_tools\7z.exe
+set "TOOL_7Z=%WORK_FOLDER%ibas_tools\7z.exe"
 if not exist "%TOOL_7Z%" set TOOL_7Z=7z.exe
 rem 设置备份目录
-set IBAS_PACKAGE_BACKUP=%IBAS_PACKAGE%backup\%DATE_NAME%\
+set "IBAS_PACKAGE_BACKUP=%IBAS_PACKAGE%backup\%DATE_NAME%\"
 if not exist "%IBAS_PACKAGE_BACKUP%" mkdir "%IBAS_PACKAGE_BACKUP%"
 
 rem 显示参数信息
@@ -69,7 +81,7 @@ rem 开始发布当前版本
 if not exist "%IBAS_PACKAGE%ibas.deploy.order.txt" dir /b /od "%IBAS_PACKAGE%ibas.*.war" >"%IBAS_PACKAGE%ibas.deploy.order.txt"
 if not exist "%IBAS_DEPLOY%ibas.release.txt" type nul >"%IBAS_DEPLOY%ibas.release.txt"
 
-for /f %%m in (%IBAS_PACKAGE%ibas.deploy.order.txt) DO (
+for /f "usebackq delims=" %%m in ("%IBAS_PACKAGE%ibas.deploy.order.txt") DO (
     echo --开始处理[%%m]
     set module=%%m
 rem 获取文件名字第二个.的位置，ibas.NAME.service-.....war
@@ -82,7 +94,8 @@ rem 获取文件名字第二个.的位置，ibas.NAME.service-.....war
             if !errorlevel! neq 0 (
                 echo !name!>>"!IBAS_DEPLOY!ibas.release.txt"
             )
-            %TOOL_7Z% x "%IBAS_PACKAGE%%%m" -r -y -o"%IBAS_DEPLOY%!name!"
+            "%TOOL_7Z%" x "%IBAS_PACKAGE%%%m" -r -y -o"%IBAS_DEPLOY%!name!"
+            if errorlevel 1 exit /b 1
 rem 存在WEB安全目录
             if exist "%IBAS_DEPLOY%!name!\WEB-INF\" (
 rem 删除配置文件，并统一到IBAS_CONF目录
@@ -129,18 +142,18 @@ if exist "%IBAS_DEPLOY%root" rename "%IBAS_DEPLOY%root" ROOT > nul
 rem 共享jar包旧版清理
 if exist "%IBAS_LIB%" (
   echo 清理[ibas_lib]旧版文件
-  if exist "%IBAS_LIB%\~file_types.txt" (del /s /q "%IBAS_LIB%\~file_types.txt" > nul)
-  echo.>"%IBAS_LIB%\~file_types.txt"
-  for /f %%m in ('dir /b /o-n "%IBAS_LIB%\*.jar"') do (
+  if exist "%IBAS_LIB%~file_types.txt" (del /s /q "%IBAS_LIB%~file_types.txt" > nul)
+  echo.>"%IBAS_LIB%~file_types.txt"
+  for /f %%m in ('dir /b /o-n "%IBAS_LIB%*.jar"') do (
     set file=%%m
     call :PosLastChar !file! - length
     call :GetChar !file! 0 !length! file_type
-	find "#!file_type!#" "%IBAS_LIB%\~file_types.txt" > nul && (
+	find "#!file_type!#" "%IBAS_LIB%~file_types.txt" > nul && (
       echo --清理[!file!]
-	  del /s /q "%IBAS_LIB%\!file!"
-      echo !file! >>"%IBAS_LIB%\~deleted_files.txt"
+	  del /s /q "%IBAS_LIB%!file!"
+      echo !file! >>"%IBAS_LIB%~deleted_files.txt"
 	) || (
-      echo #!file_type!# >>"%IBAS_LIB%\~file_types.txt"
+      echo #!file_type!# >>"%IBAS_LIB%~file_types.txt"
 	)
   )
 )

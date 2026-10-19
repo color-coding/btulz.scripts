@@ -1,4 +1,6 @@
 #!/bin/sh
+# Preserve POSIX shell semantics when invoked explicitly through zsh.
+[ -z "${ZSH_VERSION:-}" ] || exec sh "$0" "$@"
 echo '*************************************************************************************'
 echo '             deploy_apps.sh                                                          '
 echo '                      by niuren.zhu                                                  '
@@ -20,31 +22,35 @@ OPNAME=$(date '+%Y%m%d_%H%M%S')
 WORK_FOLDER=$PWD
 # 设置ibas目录
 IBAS_HOME=$1
-if [ "${IBAS_HOME}" = "" ]; then IBAS_HOME=${WORK_FOLDER}/ibas; fi
+if [ "${IBAS_HOME}" = "" ]; then IBAS_HOME=${WORK_FOLDER%/}/ibas; fi
 if [ ! -e "${IBAS_HOME}" ]; then mkdir -p "${IBAS_HOME}"; fi
+IBAS_HOME=$(CDPATH= cd -- "${IBAS_HOME}" && pwd) || exit 1
 # ibas配置目录
-IBAS_CONF=${IBAS_HOME}/conf
+IBAS_CONF=${IBAS_HOME%/}/conf
 if [ ! -e "${IBAS_CONF}" ]; then mkdir -p "${IBAS_CONF}"; fi
 # ibas数据目录
-IBAS_DATA=${IBAS_HOME}/data
+IBAS_DATA=${IBAS_HOME%/}/data
 if [ ! -e "${IBAS_DATA}" ]; then mkdir -p "${IBAS_DATA}"; fi
 # ibas日志目录
-IBAS_LOG=${IBAS_HOME}/logs
+IBAS_LOG=${IBAS_HOME%/}/logs
 if [ ! -e "${IBAS_LOG}" ]; then mkdir -p "${IBAS_LOG}"; fi
 # 设置IBAS_PACKAGE目录
 IBAS_PACKAGE=$2
-if [ "${IBAS_PACKAGE}" = "" ]; then IBAS_PACKAGE=${WORK_FOLDER}/ibas_packages; fi
+if [ "${IBAS_PACKAGE}" = "" ]; then IBAS_PACKAGE=${WORK_FOLDER%/}/ibas_packages; fi
 if [ ! -e "${IBAS_PACKAGE}" ]; then mkdir -p "${IBAS_PACKAGE}"; fi
+IBAS_PACKAGE=$(CDPATH= cd -- "${IBAS_PACKAGE}" && pwd) || exit 1
 # 设置IBAS_DEPLOY目录
 IBAS_DEPLOY=$3
-if [ "${IBAS_DEPLOY}" = "" ]; then IBAS_DEPLOY=${WORK_FOLDER}/webapps; fi
+if [ "${IBAS_DEPLOY}" = "" ]; then IBAS_DEPLOY=${WORK_FOLDER%/}/webapps; fi
 if [ ! -e "${IBAS_DEPLOY}" ]; then mkdir -p "${IBAS_DEPLOY}"; fi
+IBAS_DEPLOY=$(CDPATH= cd -- "${IBAS_DEPLOY}" && pwd) || exit 1
 # 设置IBAS_LIB目录
 IBAS_LIB=$4
-if [ "${IBAS_LIB}" = "" ]; then IBAS_LIB=${WORK_FOLDER}/ibas_lib; fi
+if [ "${IBAS_LIB}" = "" ]; then IBAS_LIB=${WORK_FOLDER%/}/ibas_lib; fi
 if [ ! -e "${IBAS_LIB}" ]; then mkdir -p "${IBAS_LIB}"; fi
+IBAS_LIB=$(CDPATH= cd -- "${IBAS_LIB}" && pwd) || exit 1
 # 设置备份目录
-IBAS_PACKAGE_BACKUP=${IBAS_PACKAGE}/backup/${OPNAME}/
+IBAS_PACKAGE_BACKUP=${IBAS_PACKAGE%/}/backup/${OPNAME}/
 if [ ! -e "${IBAS_PACKAGE_BACKUP}" ]; then mkdir -p "${IBAS_PACKAGE_BACKUP}"; fi
 
 # 开始时间
@@ -58,90 +64,91 @@ echo 共享目录：${IBAS_LIB}
 echo 数据目录：${IBAS_HOME}
 echo ----------------------------------------------------
 # 部署顺序排序
-if [ ! -e "${IBAS_PACKAGE}/ibas.deploy.order.txt" ]; then
+if [ ! -e "${IBAS_PACKAGE%/}/ibas.deploy.order.txt" ]; then
   cd "${IBAS_PACKAGE}" || exit 1
-  ls -ltr *.war 2>/dev/null | awk '//{print $NF}' >>"${IBAS_PACKAGE}/ibas.deploy.order.txt"
+  ls -ltr *.war 2>/dev/null | awk '//{print $NF}' >>"${IBAS_PACKAGE%/}/ibas.deploy.order.txt"
   cd "${WORK_FOLDER}"
 fi
 echo 开始解压模块，到目录${IBAS_DEPLOY}
-LC_ALL=C sed 's/\r//g' "${IBAS_PACKAGE}/ibas.deploy.order.txt" | while IFS= read -r file || [ -n "$file" ]; do
+LC_ALL=C sed 's/\r//g' "${IBAS_PACKAGE%/}/ibas.deploy.order.txt" | while IFS= read -r file || [ -n "$file" ]; do
+  [ -n "${file}" ] || continue
   file=${file%.war*}.war
-  echo 释放"${IBAS_PACKAGE}/${file}"
+  echo 释放"${IBAS_PACKAGE%/}/${file}"
   # 修正war包的解压目录
   folder=${file##*ibas.}
   folder=${folder%.service*}
   # 记录释放的目录到ibas.release.txt，此文件为部署顺序说明。
-  if [ ! -e "${IBAS_DEPLOY}/ibas.release.txt" ]; then : >"${IBAS_DEPLOY}/ibas.release.txt"; fi
-  grep -q -w "${folder}" "${IBAS_DEPLOY}/ibas.release.txt" || echo "${folder}" >>"${IBAS_DEPLOY}/ibas.release.txt"
+  if [ ! -e "${IBAS_DEPLOY%/}/ibas.release.txt" ]; then : >"${IBAS_DEPLOY%/}/ibas.release.txt"; fi
+  grep -q -w "${folder}" "${IBAS_DEPLOY%/}/ibas.release.txt" || echo "${folder}" >>"${IBAS_DEPLOY%/}/ibas.release.txt"
   # 解压war包到目录
-  unzip -o "${IBAS_PACKAGE}/${file}" -d "${IBAS_DEPLOY}/${folder}"
+  unzip -o "${IBAS_PACKAGE%/}/${file}" -d "${IBAS_DEPLOY%/}/${folder}" || exit 1
   # 存在WEB安全目录
-  if [ -e "${IBAS_DEPLOY}/${folder}/WEB-INF/" ]; then
+  if [ -e "${IBAS_DEPLOY%/}/${folder}/WEB-INF/" ]; then
     # 删除配置文件，并映射到统一位置
-    if [ -e "${IBAS_DEPLOY}/${folder}/WEB-INF/app.xml" ]; then
-      if [ ! -e "${IBAS_CONF}/app.xml" ]; then cp -f "${IBAS_DEPLOY}/${folder}/WEB-INF/app.xml" "${IBAS_CONF}/app.xml"; fi
-      rm -f "${IBAS_DEPLOY}/${folder}/WEB-INF/app.xml"
-      ln -s "${IBAS_CONF}/app.xml" "${IBAS_DEPLOY}/${folder}/WEB-INF/app.xml"
+    if [ -e "${IBAS_DEPLOY%/}/${folder}/WEB-INF/app.xml" ]; then
+      if [ ! -e "${IBAS_CONF%/}/app.xml" ]; then cp -f "${IBAS_DEPLOY%/}/${folder}/WEB-INF/app.xml" "${IBAS_CONF%/}/app.xml"; fi
+      rm -f "${IBAS_DEPLOY%/}/${folder}/WEB-INF/app.xml"
+      ln -s "${IBAS_CONF%/}/app.xml" "${IBAS_DEPLOY%/}/${folder}/WEB-INF/app.xml"
     fi
     # 删除服务路由文件，并映射到统一位置
-    if [ -e "${IBAS_DEPLOY}/${folder}/WEB-INF/service_routing.xml" ]; then
-      if [ ! -e "${IBAS_CONF}/service_routing.xml" ]; then cp -f "${IBAS_DEPLOY}/${folder}/WEB-INF/service_routing.xml" "${IBAS_CONF}/service_routing.xml"; fi
-      rm -f "${IBAS_DEPLOY}/${folder}/WEB-INF/service_routing.xml"
-      ln -s "${IBAS_CONF}/service_routing.xml" "${IBAS_DEPLOY}/${folder}/WEB-INF/service_routing.xml"
+    if [ -e "${IBAS_DEPLOY%/}/${folder}/WEB-INF/service_routing.xml" ]; then
+      if [ ! -e "${IBAS_CONF%/}/service_routing.xml" ]; then cp -f "${IBAS_DEPLOY%/}/${folder}/WEB-INF/service_routing.xml" "${IBAS_CONF%/}/service_routing.xml"; fi
+      rm -f "${IBAS_DEPLOY%/}/${folder}/WEB-INF/service_routing.xml"
+      ln -s "${IBAS_CONF%/}/service_routing.xml" "${IBAS_DEPLOY%/}/${folder}/WEB-INF/service_routing.xml"
     fi
     # 映射日志文件夹到统一位置
-    if [ -e "${IBAS_DEPLOY}/${folder}/WEB-INF/logs" ]; then rm -rf "${IBAS_DEPLOY}/${folder}/WEB-INF/logs"; fi
-    ln -s "${IBAS_LOG}" "${IBAS_DEPLOY}/${folder}/WEB-INF/"
+    if [ -e "${IBAS_DEPLOY%/}/${folder}/WEB-INF/logs" ]; then rm -rf "${IBAS_DEPLOY%/}/${folder}/WEB-INF/logs"; fi
+    ln -s "${IBAS_LOG}" "${IBAS_DEPLOY%/}/${folder}/WEB-INF/"
     # 映射数据文件夹到统一位置
-    if [ -e "${IBAS_DEPLOY}/${folder}/WEB-INF/data" ]; then rm -rf "${IBAS_DEPLOY}/${folder}/WEB-INF/data"; fi
-    ln -s "${IBAS_DATA}" "${IBAS_DEPLOY}/${folder}/WEB-INF/"
+    if [ -e "${IBAS_DEPLOY%/}/${folder}/WEB-INF/data" ]; then rm -rf "${IBAS_DEPLOY%/}/${folder}/WEB-INF/data"; fi
+    ln -s "${IBAS_DATA}" "${IBAS_DEPLOY%/}/${folder}/WEB-INF/"
     # 集中共享jar包
-    if [ -e "${IBAS_DEPLOY}/${folder}/WEB-INF/lib/" ]; then
+    if [ -e "${IBAS_DEPLOY%/}/${folder}/WEB-INF/lib/" ]; then
       if [ -e "${IBAS_LIB}" ]; then
         # 记录文件名称
-        ls -l "${IBAS_DEPLOY}/${folder}/WEB-INF/lib/" >"${IBAS_DEPLOY}/${folder}/WEB-INF/lib/~file_list.txt"
+        ls -l "${IBAS_DEPLOY%/}/${folder}/WEB-INF/lib/" >"${IBAS_DEPLOY%/}/${folder}/WEB-INF/lib/~file_list.txt"
         # 复制模块jar包到tomcat的lib目录
-        cp -f "${IBAS_DEPLOY}/${folder}/WEB-INF/lib/"*.jar "${IBAS_LIB}"
+        cp -f "${IBAS_DEPLOY%/}/${folder}/WEB-INF/lib/"*.jar "${IBAS_LIB}"
         # 清除tomcat的lib已经存在的jar包
-        rm -f "${IBAS_DEPLOY}/${folder}/WEB-INF/lib/"*.jar
+        rm -f "${IBAS_DEPLOY%/}/${folder}/WEB-INF/lib/"*.jar
       fi
     fi
   fi
   # 删除前端配置文件，并映射到统一位置
-  if [ -e "${IBAS_DEPLOY}/${folder}/config.json" ]; then
-    if [ ! -e "${IBAS_CONF}/config.json" ]; then cp -f "${IBAS_DEPLOY}/${folder}/config.json" "${IBAS_CONF}/config.json"; fi
-    rm -f "${IBAS_DEPLOY}/${folder}/config.json"
-    ln -s "${IBAS_CONF}/config.json" "${IBAS_DEPLOY}/${folder}/config.json"
+  if [ -e "${IBAS_DEPLOY%/}/${folder}/config.json" ]; then
+    if [ ! -e "${IBAS_CONF%/}/config.json" ]; then cp -f "${IBAS_DEPLOY%/}/${folder}/config.json" "${IBAS_CONF%/}/config.json"; fi
+    rm -f "${IBAS_DEPLOY%/}/${folder}/config.json"
+    ln -s "${IBAS_CONF%/}/config.json" "${IBAS_DEPLOY%/}/${folder}/config.json"
   fi
   # 备份程序包
-  mv "${IBAS_PACKAGE}/${file}" "${IBAS_PACKAGE_BACKUP}/${file}"
-done
+  mv "${IBAS_PACKAGE%/}/${file}" "${IBAS_PACKAGE_BACKUP%/}/${file}" || exit 1
+done || exit 1
 # 备份顺序文件
-mv "${IBAS_PACKAGE}/ibas.deploy.order.txt" "${IBAS_PACKAGE_BACKUP}/ibas.deploy.order.txt"
+mv "${IBAS_PACKAGE%/}/ibas.deploy.order.txt" "${IBAS_PACKAGE_BACKUP%/}/ibas.deploy.order.txt"
 # 修正ROOT目录
-if [ -e "${IBAS_DEPLOY}/root" ]; then
-  if [ ! -e "${WORK_FOLDER}/IBAS_PACKAGES" ]; then
+if [ -e "${IBAS_DEPLOY%/}/root" ]; then
+  if [ ! -e "${WORK_FOLDER%/}/IBAS_PACKAGES" ]; then
     # 大小写不敏感环境
-    if [ -e "${IBAS_DEPLOY}/ROOT" ]; then rm -rf "${IBAS_DEPLOY}/ROOT"; fi
+    if [ -e "${IBAS_DEPLOY%/}/ROOT" ]; then rm -rf "${IBAS_DEPLOY%/}/ROOT"; fi
   fi
-  mv "${IBAS_DEPLOY}/root" "${IBAS_DEPLOY}/ROOT"
+  mv "${IBAS_DEPLOY%/}/root" "${IBAS_DEPLOY%/}/ROOT"
 fi
 # 共享jar包旧版清理
 if [ -e "${IBAS_LIB}" ]; then
   echo 清理[ibas_lib]旧版文件
-  if [ -e "${IBAS_LIB}/~file_types.txt" ]; then
-    rm -rf "${IBAS_LIB}/~file_types.txt"
+  if [ -e "${IBAS_LIB%/}/~file_types.txt" ]; then
+    rm -rf "${IBAS_LIB%/}/~file_types.txt"
   fi
-  touch "${IBAS_LIB}/~file_types.txt"
+  touch "${IBAS_LIB%/}/~file_types.txt"
   for file in $(ls -r "${IBAS_LIB}" | awk '//{print $NF}'); do
     file_type=!${file%-*}-!
-    grep -l "${file_type}" "${IBAS_LIB}/~file_types.txt" >/dev/null
+    grep -l "${file_type}" "${IBAS_LIB%/}/~file_types.txt" >/dev/null
     if [ $? -eq 0 ]; then
       echo --清理[${file}]
-      rm -rf "${IBAS_LIB}/${file}"
-      echo "${file}" >>"${IBAS_LIB}/~deleted_files.txt"
+      rm -rf "${IBAS_LIB%/}/${file}"
+      echo "${file}" >>"${IBAS_LIB%/}/~deleted_files.txt"
     else
-      echo "${file_type}" >>"${IBAS_LIB}/~file_types.txt"
+      echo "${file_type}" >>"${IBAS_LIB%/}/~file_types.txt"
     fi
   done
 fi

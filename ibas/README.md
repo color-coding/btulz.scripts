@@ -78,6 +78,34 @@ Shell/Batch scripts for IBAS framework — covering compilation, deployment, dat
 
 ## 🚀 快速开始 | Quick Start
 
+### 终端与路径约定
+
+- Linux、macOS 使用 `.sh`；路径参数可以带或不带末尾 `/`，包含空格时必须加引号。
+- Windows 使用 `.bat`，由 `cmd.exe` 解释。目录参数支持 `/`、`\`，也支持省略末尾分隔符；脚本会在使用外部目录参数前补齐分隔符并固定为绝对路径。
+- PowerShell 可以调用 `.bat`，但不能直接解释其中的批处理语法；`sh`、Bash、zsh 同样不能解释 `.bat`。
+- `startcat.sh`、`deploy_docker.sh` 依赖 Bash；从 `sh` 或 zsh 调用时会转入 Bash，因此需要已安装 Bash。其他 `.sh` 使用 POSIX shell 语法。
+- Unix 路径使用 `/`；Windows 盘符、UNC 路径不会自动转换为 WSL 或 Git Bash 的挂载路径。URL 的分隔符不按文件系统路径处理。
+- 工作目录的既有约定保持不变：Shell 版本主要使用当前目录，部分 Batch 版本使用脚本所在目录。
+
+```sh
+# Linux/macOS：有无末尾斜杠均可
+sh ./deploy_apps.sh "./ibas home/" "./package files" "./web apps/" "./shared libs"
+# zsh 终端也可以直接执行脚本，或明确使用 Bash
+bash ./startcat.sh
+```
+
+```bat
+rem Windows cmd
+.\deploy_apps.bat "C:\Tomcat\ibas home" "C:\Tomcat\packages" "C:\Tomcat\webapps" "C:\Tomcat\ibas_lib"
+```
+
+```powershell
+# Windows PowerShell：调用 Batch 脚本
+& .\deploy_apps.bat 'C:\Tomcat\ibas home' 'C:\Tomcat\packages' 'C:\Tomcat\webapps' 'C:\Tomcat\ibas_lib'
+```
+
+路径回归验证：在仓库根目录运行 `python3 -m unittest discover -s tests -v`（Windows 可使用 `python`）。测试在临时目录执行，覆盖空格、相对/绝对路径和不同末尾分隔符；Windows 专用用例仅在 Windows 执行。Docker、Java 参数测试使用替身命令，不连接真实容器或数据库；这些测试不替代 Windows/macOS 上的原生验证。
+
 ### 开发流程
 
 ```bash

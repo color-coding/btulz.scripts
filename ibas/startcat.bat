@@ -10,11 +10,11 @@ echo              2. 选择启动模式（后台/前台）。
 echo              3. 启动Tomcat。
 echo **************************************************************************************
 rem 设置参数变量
-set WORK_FOLDER=%~dp0
+set "WORK_FOLDER=%~dp0"
 
-set CONFIG_FOLDER=%WORK_FOLDER%\ibas\conf
-set TOMCAT=%WORK_FOLDER%\bin\startup.bat
-set CATALINA=%WORK_FOLDER%\bin\catalina.bat
+set "CONFIG_FOLDER=%WORK_FOLDER%ibas\conf"
+set "TOMCAT=%WORK_FOLDER%bin\startup.bat"
+set "CATALINA=%WORK_FOLDER%bin\catalina.bat"
 
 rem 检查环境
 if not exist "%CONFIG_FOLDER%" (
@@ -37,15 +37,15 @@ call :CLEAN_FOLDER "%WORK_FOLDER%history"
 
 rem 选择文件
 echo --后端配置文件选择
-call :CHOOSE_FILE %CONFIG_FOLDER% app.xml
+call :CHOOSE_FILE "%CONFIG_FOLDER%" app.xml
 echo.
 
 echo --服务路由文件选择
-call :CHOOSE_FILE %CONFIG_FOLDER% service_routing.xml
+call :CHOOSE_FILE "%CONFIG_FOLDER%" service_routing.xml
 echo.
 
 echo --前端配置文件选择
-call :CHOOSE_FILE %CONFIG_FOLDER% config.json
+call :CHOOSE_FILE "%CONFIG_FOLDER%" config.json
 echo.
 
 rem 选择启动模式
@@ -86,7 +86,7 @@ rem 函数：列示并选择文件
 rem     参数1：文件目录
 rem     参数2：文件类型
 :CHOOSE_FILE
-    set FILE_FOLDER=%1
+    set "FILE_FOLDER=%~1"
     set FILE_TYPE=%2
 
     if not exist "%FILE_FOLDER%" goto :END_FUNC
@@ -99,13 +99,14 @@ rem     参数2：文件类型
     set FILE_FILTER=%FILE_TYPE_1%.*.%FILE_TYPE_2%
     set FILE_NAMES=
     set INDEX=0
-    for %%f in ("%FILE_FOLDER%\%FILE_FILTER%") DO (
+    for %%f in ("%FILE_FOLDER%\%FILE_FILTER%") DO if exist "%%~ff" (
         set /a INDEX=!INDEX! + 1
         echo "!INDEX!) %%~nxf"
         set FILE_NAMES[!INDEX!]=%%~ff
     )
     if exist "%FILE_FOLDER%\~last.%FILE_TYPE%" echo "0) ~last.%FILE_TYPE%"
 
+    set "CHOOSE="
     set /p CHOOSE=--请输入选择的文件序号:
     if "%CHOOSE%" equ "" goto :END_FUNC
 

@@ -14,7 +14,7 @@ echo             ^<password^>密码^<^/password^>
 echo           ^<^/server^>
 echo ****************************************************************************
 rem 设置参数变量
-set WORK_FOLDER=%~dp0
+set "WORK_FOLDER=%~dp0"
 rem 仓库根地址
 set ROOT_URL=https://maven.colorcoding.org/repository/
 rem 仓库名称
@@ -27,19 +27,19 @@ set REPOSITORY_ID=ibas-maven
 echo --检查maven运行环境
 set MVN_BIN=mvn
 if "%MAVEN_HOME%" neq "" (
-  set MVN_BIN="%MAVEN_HOME%"\bin\mvn
+  for %%I in ("%MAVEN_HOME%\bin\mvn") do set MVN_BIN="%%~fI"
 )
 call %MVN_BIN% -v >nul || goto :CHECK_MAVEN_FAILD
 
 echo --发布地址：%REPOSITORY_URL%
 rem 发布工具包集合
-if exist %WORK_FOLDER%\release\btulz.scripts.tar (
+if exist "%WORK_FOLDER%release\btulz.scripts.tar" (
   call %MVN_BIN% deploy:deploy-file ^
     -DgroupId=org.colorcoding.tools ^
     -DartifactId=btulz.scripts ^
     -Durl=%REPOSITORY_URL% ^
     -DrepositoryId=%REPOSITORY_ID% ^
-    -Dfile=%WORK_FOLDER%\release\btulz.scripts.tar ^
+    "-Dfile=%WORK_FOLDER%release\btulz.scripts.tar" ^
     -Dpackaging=tar ^
     -Dversion=latest
 )

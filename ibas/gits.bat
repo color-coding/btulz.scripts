@@ -11,7 +11,7 @@ ECHO     3. 参数1：clone时，需要提供地址，脚本会补全compile_order.txt内容。
 ECHO ****************************************************************************
 rem 设置参数变量
 rem 启动目录
-set WORK_FOLDER=%~dp0
+set "WORK_FOLDER=%~dp0"
 rem 命令
 set GIT_COMMAND=git
 rem 拼接命令
@@ -32,19 +32,19 @@ ECHO --工作目录：%WORK_FOLDER%
 ECHO --批量指令：!GIT_COMMAND!
 IF "!GIT_COMMAND:~0,9!"=="git clone" (
   IF EXIST "%WORK_FOLDER%compile_order.txt" (
-    FOR /f %%l IN (%WORK_FOLDER%compile_order.txt) DO (
-      set FOLDER=%%l
+    for /f "usebackq delims=" %%l in ("%WORK_FOLDER%compile_order.txt") DO (
+      set "FOLDER=%%l"
       !GIT_COMMAND!/!FOLDER!
     )
   )
 ) ELSE (
-  FOR /f %%l IN ('DIR /b "%WORK_FOLDER%"') DO (
-    set FOLDER=%WORK_FOLDER%%%l
-    IF EXIST !FOLDER!\.git (
+  FOR /f "delims=" %%l IN ('DIR /b "%WORK_FOLDER%"') DO (
+    set "FOLDER=%WORK_FOLDER%%%l"
+    IF EXIST "!FOLDER!\.git" (
       ECHO ----!FOLDER!
-      CD "!FOLDER!"
+      CD /d "!FOLDER!"
       %GIT_COMMAND%
     )
   )
 )
-CD %WORK_FOLDER%
+cd /d "%WORK_FOLDER%"

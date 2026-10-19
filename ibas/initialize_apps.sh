@@ -1,4 +1,6 @@
 #!/bin/sh
+# Preserve POSIX shell semantics when invoked explicitly through zsh.
+[ -z "${ZSH_VERSION:-}" ] || exec sh "$0" "$@"
 echo '****************************************************************************'
 echo '                 initialize_apps.sh                                         '
 echo '                      by niuren.zhu                                         '
@@ -20,26 +22,26 @@ if [ "$1" != "" ]; then
   IBAS_APP=$1
 fi
 # 设置ibas_tools目录
-TOOLS_FOLDER=${WORK_FOLDER}/ibas_tools
-TOOLS_TRANSFORM=${TOOLS_FOLDER}/$(ls -r "${TOOLS_FOLDER}" | grep 'btulz.transforms.bobas-' | grep -v 'source' | head -n1)
-if [ ! -e "${TOOLS_TRANSFORM}" ]; then
+TOOLS_FOLDER=${WORK_FOLDER%/}/ibas_tools
+TOOLS_TRANSFORM=${TOOLS_FOLDER%/}/$(ls -r "${TOOLS_FOLDER}" | grep 'btulz.transforms.bobas-' | grep -v 'source' | head -n1)
+if [ ! -f "${TOOLS_TRANSFORM}" ]; then
   echo not found btulz.transforms, in [${TOOLS_FOLDER}].
   exit 1
 fi
 # 设置java路径
-if [ -e "${WORK_FOLDER}/jdk/bin" ]; then
-  JAVA_HOME=${WORK_FOLDER}/jdk
+if [ -e "${WORK_FOLDER%/}/jdk/bin" ]; then
+  JAVA_HOME=${WORK_FOLDER%/}/jdk
   PATH=${JAVA_HOME}/bin:${PATH}
 fi
 
 # 设置webapps目录
-IBAS_DEPLOY=${WORK_FOLDER}/webapps
+IBAS_DEPLOY=${WORK_FOLDER%/}/webapps
 if [ ! -e "${IBAS_DEPLOY}" ]; then
   echo not found webapps.
   exit 1
 fi
 # 设置lib目录
-IBAS_LIB=${WORK_FOLDER}/ibas_lib
+IBAS_LIB=${WORK_FOLDER%/}/ibas_lib
 
 # 开始时间
 START_TIME=$(date +'%Y-%m-%d %H:%M:%S')
@@ -57,32 +59,35 @@ echo ----------------------------------------------------
 echo 开始分析${IBAS_DEPLOY}目录下数据
 db_jar=bobas\.businessobjectscommon\.
 # 检查是否存在模块说明文件，此文件描述模块初始化顺序。
-if [ ! -e "${IBAS_DEPLOY}/ibas.release.txt" ]; then
-  ls -ltr "${IBAS_DEPLOY}" | awk '/^d/{print $NF}' >"${IBAS_DEPLOY}/ibas.release.txt"
+if [ ! -e "${IBAS_DEPLOY%/}/ibas.release.txt" ]; then
+  ls -1trd "${IBAS_DEPLOY%/}/"*/ 2>/dev/null | while IFS= read -r directory; do
+      directory=${directory%/}
+      printf '%s\n' "${directory##*/}"
+    done >"${IBAS_DEPLOY%/}/ibas.release.txt"
 fi
-LC_ALL=C sed 's/\r//g' "${IBAS_DEPLOY}/ibas.release.txt" | while IFS= read -r folder || [ -n "$folder" ]; do
+LC_ALL=C sed 's/\r//g' "${IBAS_DEPLOY%/}/ibas.release.txt" | while IFS= read -r folder || [ -n "$folder" ]; do
   echo --${folder}
   # 设置配置文件，优先使用传入参数
   FILE_APP=${IBAS_APP}
   if [ ! -e "${FILE_APP}" ]; then
-    FILE_APP=${IBAS_DEPLOY}/${folder}/WEB-INF/app.xml
+    FILE_APP=${IBAS_DEPLOY%/}/${folder}/WEB-INF/app.xml
   fi
   if [ -e "${FILE_APP}" ]; then
     # 使用模块目录jar包
-    if [ -e "${IBAS_DEPLOY}/${folder}/WEB-INF/lib" ]; then
-      for file in $(ls "${IBAS_DEPLOY}/${folder}/WEB-INF/lib" | grep "${db_jar}"); do
+    if [ -e "${IBAS_DEPLOY%/}/${folder}/WEB-INF/lib" ]; then
+      for file in $(ls "${IBAS_DEPLOY%/}/${folder}/WEB-INF/lib" | grep "${db_jar}"); do
         echo ----${file}
-        FILE_DATA=${IBAS_DEPLOY}/${folder}/WEB-INF/lib/${file}
+        FILE_DATA=${IBAS_DEPLOY%/}/${folder}/WEB-INF/lib/${file}
         echo ----开始创建数据结构
         java -jar "${TOOLS_TRANSFORM}" ds "-data=${FILE_DATA}" "-config=${FILE_APP}"
       done
       FILE_CLASSES=
-      for file in $(ls "${IBAS_DEPLOY}/${folder}/WEB-INF/lib" | grep '\.jar$'); do
-        FILE_CLASSES=${FILE_CLASSES}${IBAS_DEPLOY}/${folder}/WEB-INF/lib/${file}\;
+      for file in $(ls "${IBAS_DEPLOY%/}/${folder}/WEB-INF/lib" | grep '\.jar$'); do
+        FILE_CLASSES=${FILE_CLASSES}${IBAS_DEPLOY%/}/${folder}/WEB-INF/lib/${file}\;
       done
-      for file in $(ls "${IBAS_DEPLOY}/${folder}/WEB-INF/lib" | grep "ibas\.${folder}[-.]"); do
+      for file in $(ls "${IBAS_DEPLOY%/}/${folder}/WEB-INF/lib" | grep "ibas\.${folder}[-.]"); do
         echo ----${file}
-        FILE_DATA=${IBAS_DEPLOY}/${folder}/WEB-INF/lib/${file}
+        FILE_DATA=${IBAS_DEPLOY%/}/${folder}/WEB-INF/lib/${file}
         echo ----开始创建数据结构
         java -jar "${TOOLS_TRANSFORM}" ds "-data=${FILE_DATA}" "-config=${FILE_APP}"
         echo ----开始初始化数据
@@ -93,18 +98,18 @@ LC_ALL=C sed 's/\r//g' "${IBAS_DEPLOY}/ibas.release.txt" | while IFS= read -r fo
     if [ -e "${IBAS_LIB}" ]; then
       for file in $(ls "${IBAS_LIB}" | grep "${db_jar}"); do
         echo ----${file}
-        FILE_DATA=${IBAS_LIB}/${file}
+        FILE_DATA=${IBAS_LIB%/}/${file}
         echo ----开始创建数据结构
         java -jar "${TOOLS_TRANSFORM}" ds "-data=${FILE_DATA}" "-config=${FILE_APP}"
       done
       db_jar=__DONE__
       FILE_CLASSES=
       for file in $(ls "${IBAS_LIB}" | grep '\.jar$'); do
-        FILE_CLASSES=${FILE_CLASSES}${IBAS_LIB}/${file}\;
+        FILE_CLASSES=${FILE_CLASSES}${IBAS_LIB%/}/${file}\;
       done
       for file in $(ls "${IBAS_LIB}" | grep "ibas\.${folder}[-.]"); do
         echo ----${file}
-        FILE_DATA=${IBAS_LIB}/${file}
+        FILE_DATA=${IBAS_LIB%/}/${file}
         echo ----开始创建数据结构
         java -jar "${TOOLS_TRANSFORM}" ds "-data=${FILE_DATA}" "-config=${FILE_APP}"
         echo ----开始初始化数据

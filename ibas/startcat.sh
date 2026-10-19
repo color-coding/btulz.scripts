@@ -1,4 +1,6 @@
 #!/bin/bash
+# Re-enter Bash when launched explicitly through sh or zsh.
+[ -n "${BASH_VERSION:-}" ] || exec bash "$0" "$@"
 echo '****************************************************************************'
 echo '                 startcat.sh                                                '
 echo '                      by niuren.zhu                                         '
@@ -11,22 +13,22 @@ echo '**************************************************************************
 # 设置参数变量
 # 启动目录
 WORK_FOLDER=$(pwd)
-CONFIG_FOLDER=${WORK_FOLDER}/ibas/conf
-if [ ! -e ${CONFIG_FOLDER} ]; then
+CONFIG_FOLDER=${WORK_FOLDER%/}/ibas/conf
+if [ ! -e "${CONFIG_FOLDER}" ]; then
   echo --没有配置文件夹
   exit 0
 fi
-TOMCAT=${WORK_FOLDER}/bin/startup.sh
-CATALINA=${WORK_FOLDER}/bin/catalina.sh
-if [ ! -e ${TOMCAT} ]; then
+TOMCAT=${WORK_FOLDER%/}/bin/startup.sh
+CATALINA=${WORK_FOLDER%/}/bin/catalina.sh
+if [ ! -e "${TOMCAT}" ]; then
   echo --没有TOMCAT启动脚本
   exit 0
 fi
 
 # 启动前清理运行目录：日志保留最近 3 天，其余临时目录全部清空。
 echo --清理Tomcat运行目录
-if [ -f "${WORK_FOLDER}/catalina.out" ]; then
-  : > "${WORK_FOLDER}/catalina.out"
+if [ -f "${WORK_FOLDER%/}/catalina.out" ]; then
+  : > "${WORK_FOLDER%/}/catalina.out"
 fi
 cleanLogFolder() {
   if [ -d "$1" ]; then
@@ -43,11 +45,11 @@ cleanFolder() {
     find "$1" -mindepth 1 -depth -exec rm -rf {} +
   fi
 }
-cleanLogFolder "${WORK_FOLDER}/logs"
-cleanLogFolder "${WORK_FOLDER}/ibas/logs"
-cleanFolder "${WORK_FOLDER}/temp"
-cleanFolder "${WORK_FOLDER}/ibas_packages/backup"
-cleanFolder "${WORK_FOLDER}/history"
+cleanLogFolder "${WORK_FOLDER%/}/logs"
+cleanLogFolder "${WORK_FOLDER%/}/ibas/logs"
+cleanFolder "${WORK_FOLDER%/}/temp"
+cleanFolder "${WORK_FOLDER%/}/ibas_packages/backup"
+cleanFolder "${WORK_FOLDER%/}/history"
 
 # 函数：列示并选择文件
 chooseFile() {
@@ -57,7 +59,8 @@ chooseFile() {
   INDEX=0
   echo --文件类型：${FILE_TYPE}
   echo --列示目录：${FILE_FOLDER}
-  for FILE in $(ls ${FILE_FOLDER}/${FILE_TYPE//./*}); do
+  for FILE in "${FILE_FOLDER%/}/"${FILE_TYPE//./*}; do
+    [ -f "${FILE}" ] || continue
     if [ "${FILE}" != "${FILE_FOLDER}/${FILE_TYPE}" ]; then
       FILES[$INDEX]=$FILE
       INDEX=$(expr $INDEX + 1)
@@ -78,7 +81,9 @@ chooseFile() {
   fi
   if [ -e "${CHS_FILE}" ]; then
     echo --应用文件：${CHS_FILE}
-    cp -f "${FILE_FOLDER}/${FILE_TYPE}" "${FILE_FOLDER}/~last.${FILE_TYPE}"
+    if [ "${CHS_FILE}" != "${FILE_FOLDER}/~last.${FILE_TYPE}" ] && [ -f "${FILE_FOLDER}/${FILE_TYPE}" ]; then
+      cp -f "${FILE_FOLDER}/${FILE_TYPE}" "${FILE_FOLDER}/~last.${FILE_TYPE}"
+    fi
     cp -f "${CHS_FILE}" "${FILE_FOLDER}/${FILE_TYPE}"
   else
     echo --未选择\&跳过

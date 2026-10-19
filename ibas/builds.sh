@@ -1,4 +1,6 @@
 #!/bin/sh
+# Preserve POSIX shell semantics when invoked explicitly through zsh.
+[ -z "${ZSH_VERSION:-}" ] || exec sh "$0" "$@"
 echo '****************************************************************************'
 echo '              builds.sh                                                     '
 echo '                      by niuren.zhu                                         '
@@ -29,40 +31,49 @@ if [ "${TS_COMPRESS_DISABLED}" != "true" ]; then
     exit 1
   fi
 fi
-# 获取编译内容
-COMPILE_ORDER=$@
-if [ "${COMPILE_ORDER}" = "" ]; then
-  # 没提供编译内容，则使用文件
-  if [ ! -e "${WORK_FOLDER}/compile_order.txt" ]; then
-    # 文件不存在，先构建
-    ls -ltr "${WORK_FOLDER}" | awk '/^d/{print $NF}' >"${WORK_FOLDER}/compile_order.txt"
-  fi
-  COMPILE_ORDER=$(cat "${WORK_FOLDER}/compile_order.txt")
-fi
-# 开始遍历目录
-for folder in ${COMPILE_ORDER}; do
-  for builder in $(find "${WORK_FOLDER}/${folder}" -type f -name "build_all.sh"); do
+# 每个参数或每一行代表一个模块，保留空格并兼容 CRLF 清单。
+runModule() {
+  folder=$1
+  [ -n "${folder}" ] || return 0
+  [ -d "${WORK_FOLDER%/}/${folder}" ] || return 1
+  find "${WORK_FOLDER%/}/${folder}" -type f -name "build_all.sh" | while IFS= read -r builder; do
     # 运行编译命令
     if [ ! -x "${builder}" ]; then
-      chmod +x "${builder}"
+      chmod +x "${builder}" || exit 1
     fi
     echo --开始调用：${builder}
-    "${builder}"
-  done
+    (cd "$(dirname "${builder}")" && "${builder}") || exit 1
+  done || return 1
   # 尝试压缩js文件
   if [ "${COMPRESS}" = "true" ]; then
     # 遍历当前目录
-    for file in $(find "${WORK_FOLDER}/${folder}" -type f -name "*.js" ! -name "*.min.js" ! -path "*3rdparty*" ! -path "*openui5/resources*" ! -path "*target*" ! -path "*test/integration*"); do
+    find "${WORK_FOLDER%/}/${folder}" -type f -name "*.js" ! -name "*.min.js" ! -path "*3rdparty*" ! -path "*openui5/resources*" ! -path "*target*" ! -path "*test/integration*" | while IFS= read -r file; do
       compressed=${file%.js*}.min.js
       echo --开始压缩：${file}
-      uglifyjs --compress --safari10 --keep-classnames --keep-fnames --mangle --output "${compressed}" "${file}"
+      uglifyjs --compress --safari10 --keep-classnames --keep-fnames --mangle --output "${compressed}" "${file}" || exit 1
       if [ "${TS_COMPRESS_NO_ORIGINAL}" = "true" ];then
-          cp -f "${compressed}" "${file}"
+          cp -f "${compressed}" "${file}" || exit 1
       fi
-    done
+    done || return 1
   fi
   echo '****************************************************************************'
-done
+}
+if [ "$#" -gt 0 ]; then
+  for folder do
+    runModule "${folder}" || exit 1
+  done
+else
+  if [ ! -e "${WORK_FOLDER%/}/compile_order.txt" ]; then
+    # 文件不存在，先构建
+    ls -1trd "${WORK_FOLDER%/}/"*/ 2>/dev/null | while IFS= read -r directory; do
+      directory=${directory%/}
+      printf '%s\n' "${directory##*/}"
+    done >"${WORK_FOLDER%/}/compile_order.txt"
+  fi
+  LC_ALL=C sed 's/\r//g' "${WORK_FOLDER%/}/compile_order.txt" | while IFS= read -r folder || [ -n "$folder" ]; do
+    runModule "${folder}" || exit 1
+  done || exit 1
+fi
 cd "${WORK_FOLDER}"
 # 计算执行时间
 END_TIME=$(date +'%Y-%m-%d %H:%M:%S')

@@ -1,4 +1,6 @@
 #!/bin/sh
+# Preserve POSIX shell semantics when invoked explicitly through zsh.
+[ -z "${ZSH_VERSION:-}" ] || exec sh "$0" "$@"
 echo '****************************************************************************'
 echo '                 download_apps.sh                                          '
 echo '                       by niuren.zhu                                       '
@@ -11,14 +13,15 @@ echo '**************************************************************************
 # 设置参数变量
 STARTUP_FOLDER=$(pwd)
 WORK_FOLDER=${STARTUP_FOLDER}
-PACKAGES_FOLDER=${STARTUP_FOLDER}/ibas_packages
+PACKAGES_FOLDER=${STARTUP_FOLDER%/}/ibas_packages
 if [ ! -e "${PACKAGES_FOLDER}" ]; then
   mkdir "${PACKAGES_FOLDER}"
 fi
-PACKAGES_LIST=${WORK_FOLDER}/packages.txt
+PACKAGES_LIST=${WORK_FOLDER%/}/packages.txt
 APP_VERSION=$1
 if [ "${APP_VERSION}" = "" ]; then
-  read -p "--请输入版本号: " APP_VERSION
+  printf '%s' "--请输入版本号: "
+  IFS= read -r APP_VERSION
 fi
 if [ "${APP_VERSION}" = "" ]; then
   APP_VERSION=$(date '+%Y%m%d%H%M')
@@ -47,8 +50,8 @@ LC_ALL=C sed 's/\r//g' "${PACKAGES_LIST}" | while IFS= read -r package_url || [ 
   fi
 done
 cd "${WORK_FOLDER}"
-if [ -e "${PACKAGES_FOLDER}/ibas.deploy.order.txt" ]; then
+if [ -e "${PACKAGES_FOLDER%/}/ibas.deploy.order.txt" ]; then
   echo --应用清单：
-  cat "${PACKAGES_FOLDER}/ibas.deploy.order.txt"
+  cat "${PACKAGES_FOLDER%/}/ibas.deploy.order.txt"
 fi
 echo 操作完成

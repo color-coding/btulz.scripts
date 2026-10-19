@@ -1,4 +1,6 @@
 #!/bin/sh
+# Preserve POSIX shell semantics when invoked explicitly through zsh.
+[ -z "${ZSH_VERSION:-}" ] || exec sh "$0" "$@"
 echo '****************************************************************************'
 echo '     update_db.sh                                                           '
 echo '            by niuren.zhu                                                   '
@@ -13,15 +15,15 @@ echo '**************************************************************************
 # 设置参数变量
 WORK_FOLDER=$PWD
 # 设置ibas_tools目录
-TOOLS_FOLDER=${WORK_FOLDER}/ibas_tools
-TOOLS_TRANSFORM=${TOOLS_FOLDER}/$(ls -r "${TOOLS_FOLDER}" | grep 'btulz.transforms.bobas-' | grep -v 'source' | head -n1)
-if [ ! -e "${TOOLS_TRANSFORM}" ]; then
+TOOLS_FOLDER=${WORK_FOLDER%/}/ibas_tools
+TOOLS_TRANSFORM=${TOOLS_FOLDER%/}/$(ls -r "${TOOLS_FOLDER}" | grep 'btulz.transforms.bobas-' | grep -v 'source' | head -n1)
+if [ ! -f "${TOOLS_TRANSFORM}" ]; then
   echo not found btulz.transforms, in [${TOOLS_FOLDER}].
   exit 1
 fi
 # 设置java路径
-if [ -e "${WORK_FOLDER}/jdk/bin" ]; then
-  JAVA_HOME=${WORK_FOLDER}/jdk
+if [ -e "${WORK_FOLDER%/}/jdk/bin" ]; then
+  JAVA_HOME=${WORK_FOLDER%/}/jdk
   PATH=${JAVA_HOME}/bin:${PATH}
 fi
 # 设置数据文件
@@ -32,7 +34,7 @@ if [ "${DS_FILE}" = "" ]; then
 fi
 # 设置配置文件
 CONF_APP=$2
-if [ "${CONF_APP}" = "" ]; then CONF_APP=${WORK_FOLDER}/ibas/conf/app.xml; fi
+if [ "${CONF_APP}" = "" ]; then CONF_APP=${WORK_FOLDER%/}/ibas/conf/app.xml; fi
 if [ ! -e "${CONF_APP}" ]; then
   echo not found app.xml.
   exit 1

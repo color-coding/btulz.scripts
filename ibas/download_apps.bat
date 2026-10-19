@@ -10,10 +10,10 @@ echo     2. 根据列表，下载应用到./ibas_packages。
 echo     3. 参数1，应用版本。
 echo **************************************************************************************
 rem 设置参数变量
-set STARTUP_FOLDER=%~dp0
-set PACKAGES_FOLDER=%STARTUP_FOLDER%ibas_packages\
-set WORK_FOLDER=%STARTUP_FOLDER%
-set PACKAGES_LIST=%WORK_FOLDER%packages.txt
+set "STARTUP_FOLDER=%~dp0"
+set "PACKAGES_FOLDER=%STARTUP_FOLDER%ibas_packages\"
+set "WORK_FOLDER=%STARTUP_FOLDER%"
+set "PACKAGES_LIST=%WORK_FOLDER%packages.txt"
 set APP_VERSION=%1
 if "%APP_VERSION%" equ "" (
   set /p APP_VERSION=--请输入版本号:
@@ -29,11 +29,11 @@ if "%APP_VERSION%" equ "" (
   )
 )
 
-if "%WORK_FOLDER:~-1%" neq "\" set WORK_FOLDER=%WORK_FOLDER%\
+if "%WORK_FOLDER:~-1%" neq "\" set "WORK_FOLDER=%WORK_FOLDER%\"
 if not exist "%PACKAGES_FOLDER%" mkdir "%PACKAGES_FOLDER%"
 
 rem 设置工具
-set TOOL_CURL=%WORK_FOLDER%ibas_tools\curl.exe
+set "TOOL_CURL=%WORK_FOLDER%ibas_tools\curl.exe"
 if not exist "%TOOL_CURL%" set TOOL_CURL=curl.exe
 
 rem 显示参数信息
@@ -50,7 +50,7 @@ if not exist "%PACKAGES_LIST%" (
 )
 
 rem 下载列表文件
-cd "%PACKAGES_FOLDER%"
+cd /d "%PACKAGES_FOLDER%"
 for /f "usebackq delims=" %%l in ("%PACKAGES_LIST%") do (
   set PACKAGE_URL=%%l
   if "!PACKAGE_URL:~0,4!" equ "http" (
@@ -61,9 +61,9 @@ for /f "usebackq delims=" %%l in ("%PACKAGES_LIST%") do (
     "!TOOL_CURL!" --retry 3 -Lf -O "!PACKAGE_URL!" && echo !FILE_NAME!>>ibas.deploy.order.txt
   )
 )
-cd "%WORK_FOLDER%"
-if exist "%PACKAGES_FOLDER%\ibas.deploy.order.txt" (
+cd /d "%WORK_FOLDER%"
+if exist "%PACKAGES_FOLDER%ibas.deploy.order.txt" (
   echo --应用清单：
-  type "%PACKAGES_FOLDER%\ibas.deploy.order.txt"
+  type "%PACKAGES_FOLDER%ibas.deploy.order.txt"
 )
 echo 操作完成

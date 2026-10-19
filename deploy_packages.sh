@@ -1,4 +1,6 @@
 #!/bin/sh
+# Preserve POSIX shell semantics when invoked explicitly through zsh.
+[ -z "${ZSH_VERSION:-}" ] || exec sh "$0" "$@"
 echo '*****************************************************************'
 echo '              deploy_packages.sh                                 '
 echo '                    by niuren.zhu                                '
@@ -34,13 +36,13 @@ fi
 
 echo --发布地址：${REPOSITORY_URL}
 # 发布工具包集合
-if [ -e ${WORK_FOLDER}/release/btulz.scripts.tar ]; then
+if [ -e "${WORK_FOLDER%/}/release/btulz.scripts.tar" ]; then
   mvn deploy:deploy-file \
     -DgroupId=org.colorcoding.tools \
     -DartifactId=btulz.scripts \
     -Durl=${REPOSITORY_URL} \
     -DrepositoryId=${REPOSITORY_ID} \
-    -Dfile=${WORK_FOLDER}/release/btulz.scripts.tar \
+    "-Dfile=${WORK_FOLDER%/}/release/btulz.scripts.tar" \
     -Dpackaging=tar \
     -Dversion=latest
 fi

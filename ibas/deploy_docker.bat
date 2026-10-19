@@ -13,8 +13,7 @@ echo     5. 若开启Tomcat远程诊断，可以用jconsole连接，注意端口冲突。
 echo     6. 网站目录host文件会自动添加到容器（貌似windows不支持）。
 echo **************************************************************************************
 rem 设置参数变量
-set WORK_FOLDER=%~dp0
-if "%WORK_FOLDER:~-1%" equ "\" set WORK_FOLDER=%WORK_FOLDER:~0,-1%
+set "WORK_FOLDER=%~dp0"
 
 echo --工作目录：%WORK_FOLDER%
 rem 获取网站名称
@@ -27,17 +26,17 @@ if "%WEBSITE%" equ "" (
 if "%WEBSITE%" equ "" (
     goto :eof
 )
-if not exist "%WORK_FOLDER%\%WEBSITE%" mkdir "%WORK_FOLDER%\%WEBSITE%"
+if not exist "%WORK_FOLDER%%WEBSITE%" mkdir "%WORK_FOLDER%%WEBSITE%"
 
 rem 创建网站容器
 call :DOWNCASE ibas-tomcat-%WEBSITE% RESULT
 set CONTAINER_TOMCAT=%RESULT%
 echo --网站容器：%CONTAINER_TOMCAT%
 rem 检查数据目录
-if not exist "%WORK_FOLDER%\%WEBSITE%\ibas\conf\" mkdir "%WORK_FOLDER%\%WEBSITE%\ibas\conf\"
-if not exist "%WORK_FOLDER%\%WEBSITE%\ibas\data\" mkdir "%WORK_FOLDER%\%WEBSITE%\ibas\data\"
-if not exist "%WORK_FOLDER%\%WEBSITE%\ibas\logs\" mkdir "%WORK_FOLDER%\%WEBSITE%\ibas\logs\"
-if not exist "%WORK_FOLDER%\%WEBSITE%\ibas_packages\" mkdir "%WORK_FOLDER%\%WEBSITE%\ibas_packages\"
+if not exist "%WORK_FOLDER%%WEBSITE%\ibas\conf\" mkdir "%WORK_FOLDER%%WEBSITE%\ibas\conf\"
+if not exist "%WORK_FOLDER%%WEBSITE%\ibas\data\" mkdir "%WORK_FOLDER%%WEBSITE%\ibas\data\"
+if not exist "%WORK_FOLDER%%WEBSITE%\ibas\logs\" mkdir "%WORK_FOLDER%%WEBSITE%\ibas\logs\"
+if not exist "%WORK_FOLDER%%WEBSITE%\ibas_packages\" mkdir "%WORK_FOLDER%%WEBSITE%\ibas_packages\"
 set /p RESET_TOMCAT=----重建网站容器？（n or [y]）:
 if "%RESET_TOMCAT%" equ "" set RESET_TOMCAT=y
 
@@ -49,10 +48,10 @@ if "%RESET_TOMCAT%" equ "y" (
             set JMX_PORT=8900
         )
         rem 检查环境变量文件
-        if exist "%WORK_FOLDER%\%WEBSITE%\tomcat_setenv.bat" (
-            del /f "%WORK_FOLDER%\%WEBSITE%\tomcat_setenv.bat"
+        if exist "%WORK_FOLDER%%WEBSITE%\tomcat_setenv.bat" (
+            del /f "%WORK_FOLDER%%WEBSITE%\tomcat_setenv.bat"
         )
-        set OUT_PUT="%WORK_FOLDER%\%WEBSITE%\tomcat_setenv.bat"
+        set OUT_PUT="%WORK_FOLDER%%WEBSITE%\tomcat_setenv.bat"
         echo rem script created >!OUT_PUT!
         echo set JAVA_OPTS="%%JAVA_OPTS%% -Dcom.sun.management.jmxremote" >>!OUT_PUT!
         echo set JAVA_OPTS="%%JAVA_OPTS%% -Dcom.sun.management.jmxremote.authenticate=false" >>!OUT_PUT!
@@ -61,7 +60,7 @@ if "%RESET_TOMCAT%" equ "y" (
         echo set JAVA_OPTS="%%JAVA_OPTS%% -Dcom.sun.management.jmxremote.rmi.port=!JMX_PORT!" >>!OUT_PUT!
         echo set JAVA_OPTS="%%JAVA_OPTS%% -Djava.rmi.server.hostname=%ComputerName%" >>!OUT_PUT!
 
-        set DOCKER_JMX=-v "%WORK_FOLDER%\%WEBSITE%\tomcat_setenv.bat:C:\apache-tomcat\bin\setenv.bat"
+        set DOCKER_JMX=-v "%WORK_FOLDER%%WEBSITE%\tomcat_setenv.bat:C:\apache-tomcat\bin\setenv.bat"
         set DOCKER_JMX=!DOCKER_JMX! -p !JMX_PORT!:!JMX_PORT!
     )
     set /p MEM_TOMCAT=----网站容器内存？（1024m）:
@@ -69,11 +68,11 @@ if "%RESET_TOMCAT%" equ "y" (
         set MEM_TOMCAT=1024
     )
     set /a MEM_JAVA=!MEM_TOMCAT! - 128
-    if exist "%WORK_FOLDER%\%WEBSITE%\hosts" (
+    if exist "%WORK_FOLDER%%WEBSITE%\hosts" (
 rem 貌似windows版不支持
         set /p USE_HOSTS=----检测到host文件是否使用？（[n] or y）:
         if "!USE_HOSTS!" equ "y" (
-            for /f "delims=" %%m in (%WORK_FOLDER%\%WEBSITE%\hosts) DO (
+            for /f "usebackq delims=" %%m in ("%WORK_FOLDER%%WEBSITE%\hosts") DO (
                 set HOST=%%m
                 if "!HOST:~0,1!" neq "#" (
                     set DONE=YES
@@ -106,8 +105,8 @@ rem 貌似windows版不支持
             )
         )
     )
-    if exist "%WORK_FOLDER%\%WEBSITE%\CONTAINER_IMAGE" (
-        set /P DEF_IMAGE_TOMCAT=<"%WORK_FOLDER%\%WEBSITE%\CONTAINER_IMAGE"
+    if exist "%WORK_FOLDER%%WEBSITE%\CONTAINER_IMAGE" (
+        set /P DEF_IMAGE_TOMCAT=<"%WORK_FOLDER%%WEBSITE%\CONTAINER_IMAGE"
     )
     if "!DEF_IMAGE_TOMCAT!" equ "" (
         set DEF_IMAGE_TOMCAT=colorcoding/tomcat:ibas-alpine
@@ -121,12 +120,12 @@ rem 貌似windows版不支持
     docker run -d ^
         --name %CONTAINER_TOMCAT% ^
         -m !MEM_TOMCAT!m ^
-        -v "%WORK_FOLDER%\%WEBSITE%\ibas:C:\apache-tomcat\ibas" ^
-        -v "%WORK_FOLDER%\%WEBSITE%\ibas_packages:C:\apache-tomcat\ibas_packages" ^
+        -v "%WORK_FOLDER%%WEBSITE%\ibas:C:\apache-tomcat\ibas" ^
+        -v "%WORK_FOLDER%%WEBSITE%\ibas_packages:C:\apache-tomcat\ibas_packages" ^
         !STARTUP_PARS! ^
         !HOST_TOMCAT! ^
         !IMAGE_TOMCAT!
-    echo !IMAGE_TOMCAT!>"%WORK_FOLDER%\%WEBSITE%\CONTAINER_IMAGE"
+    echo !IMAGE_TOMCAT!>"%WORK_FOLDER%%WEBSITE%\CONTAINER_IMAGE"
 ) else (
     rem 启动更新，需要做好目录映射
     docker start %CONTAINER_TOMCAT%
@@ -144,8 +143,8 @@ docker restart %CONTAINER_TOMCAT%
 
 rem 更新根网站
 set CONTAINER_NGINX=ibas-nginx-root
-set NGINX_CONFD=%WORK_FOLDER%\root\conf.d
-set NGINX_CERT=%WORK_FOLDER%\root\cert
+set NGINX_CONFD=%WORK_FOLDER%root\conf.d
+set NGINX_CERT=%WORK_FOLDER%root\cert
 set NGINX_NAME=%ComputerName%
 set NGINX_PORT_HTTP=
 

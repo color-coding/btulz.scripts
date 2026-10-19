@@ -1,4 +1,6 @@
 #!/bin/sh
+# Preserve POSIX shell semantics when invoked explicitly through zsh.
+[ -z "${ZSH_VERSION:-}" ] || exec sh "$0" "$@"
 echo '****************************************************************************'
 echo '                 gits.sh                                                    '
 echo '                      by niuren.zhu                                         '
@@ -29,18 +31,18 @@ echo --批量指令：git ${GIT_COMMAND}
 if [ "$1" = "clone" ]; then
   # clone时：参数1=clone，参数2=仓库地址
   CLONE_URL="$2"
-  LC_ALL=C sed 's/\r//g' "${WORK_FOLDER}/compile_order.txt" | while IFS= read -r folder || [ -n "$folder" ]; do
+  LC_ALL=C sed 's/\r//g' "${WORK_FOLDER%/}/compile_order.txt" | while IFS= read -r folder || [ -n "$folder" ]; do
     [ -z "${folder}" ] && continue
     git clone "${CLONE_URL}/${folder}"
   done
   exit 0
 fi
 # 遍历当前目录
-for folder in $(ls -l "${WORK_FOLDER}" | awk '/^d/{print $NF}'); do
-  if [ -e "${WORK_FOLDER}/${folder}/.git" ]; then
-    cd "${WORK_FOLDER}/${folder}" || continue
+for folder in "${WORK_FOLDER%/}/"*/; do
+  if [ -e "${folder}/.git" ]; then
+    cd "${folder}" || continue
     echo ----$(pwd)
-    git ${GIT_COMMAND}
+    git "$@"
   fi
 done
 cd "${WORK_FOLDER}"
